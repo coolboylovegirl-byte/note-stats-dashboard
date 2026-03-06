@@ -1254,17 +1254,21 @@ function validateConfig() {
 async function init() {
   if (!validateConfig()) return;
   try {
-    const [summary, articles, followers, trend, assets] = await Promise.all([
-      fetchCSV('daily_summary'),
-      fetchCSV('articles'),
-      fetchCSV('followers'),
-      fetchCSV('trend_analysis'),
-      fetchCSV('asset_articles')
-    ]);
+    const summary = await fetchCSV('daily_summary');
+    const articles = await fetchCSV('articles');
+    const trend = await fetchCSV('trend_analysis');
+    const assets = await fetchCSV('asset_articles');
+
+    let followers = [];
+    try {
+      followers = await fetchCSV('followers');
+    } catch (e) {
+      console.warn('followers.csv not found, fallback to summary only');
+    }
 
     const latest = summary[summary.length - 1];
-    document.getElementById('kpi-views').textContent    = Number(latest['ビュー合計']).toLocaleString();
-    document.getElementById('kpi-likes').textContent    = Number(latest['スキ合計']).toLocaleString();
+    document.getElementById('kpi-views').textContent = Number(latest['ビュー合計']).toLocaleString();
+    document.getElementById('kpi-likes').textContent = Number(latest['スキ合計']).toLocaleString();
     document.getElementById('kpi-articles').textContent = Number(latest['記事数']).toLocaleString();
     document.getElementById('kpi-followers').textContent = latest['フォロワー数'] || '—';
     document.getElementById('last-updated').textContent = `updated ${latest['日付']} ${latest['更新時刻'] || ''}`;
@@ -1288,8 +1292,3 @@ async function init() {
     document.getElementById('last-updated').textContent = 'error: ' + e.message;
   }
 }
-
-init();
-</script>
-</body>
-</html>
