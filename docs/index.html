@@ -1287,8 +1287,10 @@ async function init() {
     buildAssetTable(assets);
     buildTrendDetailed(trend);
 
-  } catch (e) {
+    } catch (e) {
     console.error(e);
     document.getElementById('last-updated').textContent = 'error: ' + e.message;
   }
 }
+
+init();
