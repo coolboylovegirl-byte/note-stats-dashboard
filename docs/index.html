@@ -518,13 +518,250 @@ header {
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 900px) {
-  .kpi-strip { grid-template-columns: repeat(2,1fr); }
-  .grid { grid-template-columns: 1fr; }
-  .panel { border-right: none !important; }
-  .status-band { grid-template-columns: 1fr; gap: 16px; }
-  .band-divider { display: none; }
-  .worst-grid { grid-template-columns: 1fr; }
-  header, .kpi, .panel, .kpi3-item, .status-memo-wrap { padding-left: 16px; padding-right: 16px; }
+  header {
+    padding: 0 14px;
+    height: 52px;
+  }
+
+  .logo {
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  .header-right {
+    gap: 10px;
+  }
+
+  #last-updated {
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    max-width: 140px;
+    text-align: right;
+    line-height: 1.3;
+  }
+
+  .header-badge {
+    font-size: 8px;
+    padding: 2px 6px;
+  }
+
+  .dashboard {
+    max-width: 100%;
+  }
+
+  /* 上の診断帯を縦並び */
+  .status-band {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 12px 0;
+  }
+
+  .band-divider,
+  .band-divider.thick {
+    display: none;
+  }
+
+  .kpi3-item,
+  .status-memo-wrap {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .status-memo-wrap {
+    border-bottom: none;
+  }
+
+  .kpi3-label,
+  .status-memo-label {
+    font-size: 13px;
+    margin-bottom: 8px;
+    letter-spacing: 0.06em;
+  }
+
+  .kpi3-val {
+    font-size: 28px;
+  }
+
+  .kpi3-sub {
+    font-size: 11px;
+  }
+
+  #status-memo-text {
+    font-size: 14px;
+    min-height: auto;
+  }
+
+  /* KPI 4枚を2列→1列にして見やすく */
+  .kpi-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .kpi {
+    padding: 18px 16px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .kpi:last-child {
+    border-bottom: none;
+  }
+
+  .kpi-label {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .kpi-value {
+    font-size: 40px;
+  }
+
+  .kpi-diff {
+    font-size: 11px;
+  }
+
+  /* 本文パネルは1列 */
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel,
+  .panel.full,
+  .panel.third {
+    border-right: none !important;
+    padding: 18px 16px;
+  }
+
+  .panel-header {
+    margin-bottom: 14px;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .panel-title {
+    font-size: 15px;
+    line-height: 1.4;
+    letter-spacing: 0.06em;
+  }
+
+  .panel-badge {
+    font-size: 9px;
+    white-space: nowrap;
+  }
+
+  .chart-wrap {
+    height: 240px;
+  }
+
+  .chart-wrap.tall {
+    height: 300px;
+  }
+
+  /* ランキングを読みやすく */
+  .ranking-list {
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 0;
+  }
+
+  .rank-item {
+    grid-template-columns: 24px 1fr;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .rank-right {
+    grid-column: 2;
+    width: 100%;
+  }
+
+  .rank-title {
+    font-size: 14px;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.4;
+  }
+
+  .rank-val {
+    min-width: 52px;
+    font-size: 11px;
+  }
+
+  /* ワースト・ベストを1列化 */
+  .worst-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .worst-section-title,
+  .best-section-title {
+    font-size: 13px;
+    letter-spacing: 0.12em;
+  }
+
+  /* テーブルは横スクロール前提 */
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table {
+    min-width: 720px;
+    font-size: 11px;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .inline-bar {
+    width: 56px;
+  }
+}
+
+/* さらに狭いスマホ用 */
+@media (max-width: 480px) {
+  header {
+    padding: 0 12px;
+  }
+
+  .logo {
+    font-size: 12px;
+  }
+
+  #last-updated {
+    max-width: 110px;
+    font-size: 9px;
+  }
+
+  .kpi3-val {
+    font-size: 24px;
+  }
+
+  .kpi-value {
+    font-size: 34px;
+  }
+
+  .panel-title {
+    font-size: 14px;
+  }
+
+  .chart-wrap {
+    height: 220px;
+  }
+
+  .chart-wrap.tall {
+    height: 260px;
+  }
+
+  .rank-title {
+    font-size: 13px;
+  }
 }
 </style>
 </head>
