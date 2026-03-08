@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>note / stats - tomo mobile</title>
+<title>note / stats - ねんころ mobile</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
 <style>
@@ -469,6 +469,15 @@ body::before {
     </section>
 
     <section class="section">
+  <div class="section-title">
+    <span class="dot accent-rose"></span>
+    <h2>直近7日 急上昇ランキング</h2>
+    <span class="small-badge">+7D PV</span>
+  </div>
+  <div class="ranking-wrap" id="ranking-growth"></div>
+</section>
+    
+    <section class="section">
       <div class="section-title">
         <span class="dot accent-violet"></span>
         <h2>フォロワー 日次推移</h2>
@@ -732,6 +741,82 @@ function buildRanking(containerId, rows, valueKey, barClass, valClass) {
   }).join('');
 }
 
+function buildGrowthRanking(containerId, rows) {
+  if (!rows.length) return;
+
+  // 日付一覧を新しい順に並べる
+  const dates = [...new Set(rows.map(r => r.date))].sort();
+  if (dates.length < 2) {
+    document.getElementById(containerId).innerHTML =
+      '<div class="card pad" style="color:var(--text2);">まだ比較用データが足りません</div>';
+    return;
+  }
+
+  const latestDate = dates[dates.length - 1];
+  const baseIndex = Math.max(0, dates.length - 8); // 7日前相当
+  const baseDate = dates[baseIndex];
+
+  const latestRows = rows.filter(r => r.date === latestDate);
+  const baseRows = rows.filter(r => r.date === baseDate);
+
+  // keyごとに7日前データを引けるようにする
+  const baseMap = {};
+  baseRows.forEach(r => {
+    baseMap[r.key] = r;
+  });
+
+  const growthList = latestRows
+    .filter(r => !EXCLUDED_TITLES.includes(r.title))
+    .map(r => {
+      const currentPV = Number(r.read_count) || 0;
+      const prevPV = baseMap[r.key] ? (Number(baseMap[r.key].read_count) || 0) : 0;
+      const growth = currentPV - prevPV;
+
+      return {
+        ...r,
+        growth
+      };
+    })
+    .filter(r => r.growth > 0)
+    .sort((a, b) => b.growth - a.growth)
+    .slice(0, 10);
+
+  if (!growthList.length) {
+    document.getElementById(containerId).innerHTML =
+      '<div class="card pad" style="color:var(--text2);">直近7日で伸びた記事はまだありません</div>';
+    return;
+  }
+
+  const max = Math.max(...growthList.map(r => r.growth), 1);
+  const medal = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+
+  document.getElementById(containerId).innerHTML = growthList.map((r, i) => {
+    const scaled = max > 1
+      ? (Math.log10(r.growth + 1) / Math.log10(max + 1)) * 67 + 18
+      : 18;
+
+    const url = buildNoteUrl(r);
+    const titleHTML = url
+      ? `<a class="rank-title rank-link" href="${url}" target="_blank" rel="noopener noreferrer" title="${r.title}">${r.title}</a>`
+      : `<span class="rank-title" title="${r.title}">${r.title}</span>`;
+
+    return `
+      <div class="rank-item">
+        <div class="rank-head">
+          <span class="rank-num ${medal(i)}">${String(i + 1).padStart(2, '0')}</span>
+          ${titleHTML}
+        </div>
+        <div class="rank-meta">
+          <span class="rank-val growth-val">+${r.growth.toLocaleString()}</span>
+          <div class="rank-bar">
+            <div class="rank-bar-fill growth-bar" style="width:${scaled.toFixed(1)}%"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}  
+  
 function buildFollowers(summary, followers) {
   const fRows = followers.filter(r => r['フォロワー数']);
   let labels = [];
@@ -892,12 +977,13 @@ async function init() {
     setDiff('kpi-likes-diff', parseFloat(latest['スキ前日比(%)']));
 
     buildDaily(summary);
-    buildRanking('ranking-views', articles, 'read_count', 'view-bar', 'view-val');
-    buildRanking('ranking-likes', articles, 'like_count', 'like-bar', 'like-val');
-    buildFollowers(summary, followers);
-    buildQuad(summary);
-    buildAssetTable(assets);
-    buildTrendDetailed(trend);
+buildRanking('ranking-views', articles, 'read_count', 'view-bar', 'view-val');
+buildRanking('ranking-likes', articles, 'like_count', 'like-bar', 'like-val');
+buildGrowthRanking('ranking-growth', articles);
+buildFollowers(summary, followers);
+buildQuad(summary);
+buildAssetTable(assets);
+buildTrendDetailed(trend);
 
   } catch (e) {
     console.error(e);
