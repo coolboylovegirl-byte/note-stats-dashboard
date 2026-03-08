@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>note / stats - nenkoro mobile</title>
+<title>note / stats - tomo mobile</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
 <style>
@@ -556,6 +556,7 @@ const CONFIG = {
   repo: 'coolboylovegirl-byte/note-stats-dashboard',
   dataPath: 'data',
   excludeTitles: [],
+  noteUsername: 'nenkoro_life' // ← トモちゃんのnoteユーザー名に変更してOK
 };
 
 const EXCLUDED_TITLES = CONFIG.excludeTitles;
@@ -685,6 +686,11 @@ function buildDaily(rows) {
   });
 }
 
+function buildNoteUrl(row) {
+  if (!CONFIG.noteUsername || !row.key) return null;
+  return `https://note.com/${CONFIG.noteUsername}/n/${row.key}`;
+}
+
 function buildRanking(containerId, rows, valueKey, barClass, valClass) {
   if (!rows.length) return;
 
@@ -703,11 +709,17 @@ function buildRanking(containerId, rows, valueKey, barClass, valClass) {
       ? (Math.log10(value + 1) / Math.log10(max + 1)) * 67 + 18
       : 18;
 
+    const url = buildNoteUrl(r);
+
+    const titleHTML = url
+      ? `<a class="rank-title rank-link" href="${url}" target="_blank" rel="noopener noreferrer" title="${r.title}">${r.title}</a>`
+      : `<span class="rank-title" title="${r.title}">${r.title}</span>`;
+
     return `
       <div class="rank-item">
         <div class="rank-head">
           <span class="rank-num ${medal(i)}">${String(i + 1).padStart(2, '0')}</span>
-          <span class="rank-title" title="${r.title}">${r.title}</span>
+          ${titleHTML}
         </div>
         <div class="rank-meta">
           <span class="rank-val ${valClass}">${value.toLocaleString()}</span>
