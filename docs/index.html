@@ -625,14 +625,14 @@ body::before {
             <div class="kpi-sub">コメント1件以上の記事数</div>
           </div>
 
-          <div class="card pad kpi-card">
-            <div class="kpi-top">
-              <span class="kpi-dot accent-gold"></span>
-              <div class="kpi-label">Avg Comment Rate</div>
-            </div>
-            <div class="kpi-value" id="comment-rate">—</div>
-            <div class="kpi-sub">コメント ÷ PV × 100</div>
-          </div>
+<div class="card pad kpi-card">
+  <div class="kpi-top">
+    <span class="kpi-dot accent-gold"></span>
+    <div class="kpi-label">Avg Like Rate</div>
+  </div>
+  <div class="kpi-value" id="like-rate">—</div>
+  <div class="kpi-sub">スキ ÷ PV × 100</div>
+</div>
 
           <div class="card pad kpi-card kpi-highlight">
             <div class="kpi-top">
@@ -721,15 +721,16 @@ body::before {
           </div>
         </div>
 
-        <div>
-          <div class="section-title">
-            <span class="dot accent-violet"></span>
-            <h2>4象限マップ｜PV × スキ率</h2>
-          </div>
-          <div class="card chart-card">
-            <div class="chart-wrap small"><canvas id="chart-quad"></canvas></div>
-          </div>
-        </div>
+<div>
+  <div class="section-title">
+    <span class="dot accent-rose"></span>
+    <h2>コメント濃度 推移</h2>
+    <span class="small-badge">COMMENT / LIKE</span>
+  </div>
+  <div class="card chart-card">
+    <div class="chart-wrap small"><canvas id="chart-comment-density"></canvas></div>
+  </div>
+</div>
       </section>
 
       <section class="section">
@@ -1503,6 +1504,23 @@ function buildLatestArticleRows(rows) {
       read_count: pv,
       like_count: likes,
       comment_count: comments,
+      like_rate: pv >= 50 ? (likes / pv) * 100 : null,
+      comment_like_rate: (likes >= 30 && pv >= 300) ? (comments / likes) * 100 : null
+    };
+  });
+}
+
+  return Object.values(byKey).map(r => {
+    const pv = parseNumber(r.read_count);
+    const likes = parseNumber(r.like_count);
+    const comments = parseNumber(r.comment_count);
+
+    return {
+      key: r.key || '',
+      title: r.title || '',
+      read_count: pv,
+      like_count: likes,
+      comment_count: comments,
       comment_rate: pv >= 50 ? (comments / pv) * 100 : null,
       comment_like_rate: (likes >= 30 && pv >= 300) ? (comments / likes) * 100 : null
     };
@@ -1515,14 +1533,14 @@ function renderCommentKPIs(rows) {
   const total = rows.reduce((sum, r) => sum + parseNumber(r.comment_count), 0);
   const engaged = rows.filter(r => parseNumber(r.comment_count) >= 1).length;
 
-  const rateRows = rows.filter(r => r.comment_rate !== null);
-  const avgRate = rateRows.length
-    ? rateRows.reduce((sum, r) => sum + r.comment_rate, 0) / rateRows.length
+  const likeRateRows = rows.filter(r => r.like_rate !== null);
+  const avgLikeRate = likeRateRows.length
+    ? likeRateRows.reduce((sum, r) => sum + r.like_rate, 0) / likeRateRows.length
     : 0;
 
-  const likeRateRows = rows.filter(r => r.comment_like_rate !== null);
-  const avgLikeRate = likeRateRows.length
-    ? likeRateRows.reduce((sum, r) => sum + r.comment_like_rate, 0) / likeRateRows.length
+  const commentLikeRateRows = rows.filter(r => r.comment_like_rate !== null);
+  const avgCommentLikeRate = commentLikeRateRows.length
+    ? commentLikeRateRows.reduce((sum, r) => sum + r.comment_like_rate, 0) / commentLikeRateRows.length
     : 0;
 
   const maxRow = rows.reduce((a, b) =>
@@ -1541,17 +1559,98 @@ function renderCommentKPIs(rows) {
   const commentEngagedEl = document.getElementById('comment-engaged');
   if (commentEngagedEl) commentEngagedEl.textContent = engaged.toLocaleString();
 
-  const commentRateEl = document.getElementById('comment-rate');
-  if (commentRateEl) commentRateEl.textContent = avgRate.toFixed(3) + '%';
+  const likeRateEl = document.getElementById('like-rate');
+  if (likeRateEl) likeRateEl.textContent = avgLikeRate.toFixed(3) + '%';
 
   const commentLikeRateEl = document.getElementById('comment-like-rate');
-  if (commentLikeRateEl) commentLikeRateEl.textContent = avgLikeRate.toFixed(3) + '%';
+  if (commentLikeRateEl) commentLikeRateEl.textContent = avgCommentLikeRate.toFixed(3) + '%';
 
   const commentMaxEl = document.getElementById('comment-max');
   if (commentMaxEl) commentMaxEl.textContent = parseNumber(maxRow?.comment_count).toLocaleString();
 
   const commentMaxTitleEl = document.getElementById('comment-max-title');
   if (commentMaxTitleEl) commentMaxTitleEl.textContent = maxRow?.title || '—';
+}
+
+  function buildCommentDensityTrend(rows) {
+  const canvas = document.getElementById('chart-comment-density');
+  if (!canvas) return;
+
+  const latestDate = [...new Set(rows.map(r => r.date))].sort().pop();
+  if (!latestDate) return;
+
+  const latestRows = rows
+    .filter(r => r.date === latestDate && !EXCLUDED_TITLES.includes(r.title))
+    .map(r => {
+      const pv = parseNumber(r.read_count);
+      const likes = parseNumber(r.like_count);
+      const comments = parseNumber(r.comment_count);
+      return {
+        ...r,
+        like_rate: pv >= 50 ? (likes / pv) * 100 : null,
+        comment_like_rate: (likes >= 30 && pv >= 300) ? (comments / likes) * 100 : null
+      };
+    })
+    .filter(r => r.comment_like_rate !== null)
+    .sort((a, b) => b.comment_like_rate - a.comment_like_rate)
+    .slice(0, 15);
+
+  if (!latestRows.length) return;
+
+  const labels = latestRows.map(r => {
+    const title = r.title || '';
+    return title.length > 16 ? title.slice(0, 16) + '…' : title;
+  });
+  const density = latestRows.map(r => r.comment_like_rate);
+
+  new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'コメント濃度',
+        data: density,
+        borderColor: '#e7a9bc',
+        backgroundColor: 'rgba(231,169,188,0.18)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      ...baseOpts(),
+      plugins: {
+        ...baseOpts().plugins,
+        tooltip: {
+          ...baseOpts().plugins.tooltip,
+          callbacks: {
+            title: items => latestRows[items[0].dataIndex]?.title || '',
+            label: item => `コメント濃度: ${Number(item.raw).toFixed(3)}%`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: GRID_COLOR },
+          ticks: { color: '#8b83a5', maxRotation: 0, minRotation: 0 }
+        },
+        y: {
+          grid: { color: GRID_COLOR },
+          ticks: {
+            color: '#8b83a5',
+            callback: value => value + '%'
+          },
+          title: {
+            display: true,
+            text: 'コメント ÷ スキ × 100',
+            color: '#8b83a5'
+          }
+        }
+      }
+    }
+  });
 }
 
 function buildSimpleRanking(containerId, rows, valueKey, barClass, valClass, formatter) {
@@ -1675,16 +1774,17 @@ function renderCommentSection(articleRows) {
   buildSimpleRanking(
     'ranking-comment-rate',
     [...rows]
-      .filter(r => r.comment_rate !== null)
-      .sort((a, b) => b.comment_rate - a.comment_rate)
+      .filter(r => r.like_rate !== null)
+      .sort((a, b) => b.like_rate - a.like_rate)
       .slice(0, 10),
-    'comment_rate',
+    'like_rate',
     'growth-bar',
     'growth-val',
     v => `${v.toFixed(3)}%`
   );
 
   buildCommentScatter(rows);
+  buildCommentDensityTrend(articleRows);
 }
 
 function getWeekOfMonth(dateStr) {
@@ -1992,7 +2092,6 @@ async function init() {
     buildRanking('ranking-likes', articles, 'like_count', 'like-bar', 'like-val');
     buildGrowthRanking('ranking-growth', articles);
     buildFollowers(summary, followers);
-    buildQuad(summary);
     buildAssetTable(assets);
     buildTrendDetailed(trend);
 
