@@ -762,7 +762,7 @@ function buildLatestArticleRows(rows) {
 function renderCommentKPIs(rows) {
   const total = rows.reduce((sum, r) => sum + r.comment_count, 0);
   const engaged = rows.filter(r => r.comment_count >= 1).length;
-  const rateRows = rows.filter(r => r.comment_rate !== null);
+  const rateRows = rows.filter(r => r.comment_rate !== null && r.read_count >= 500)
   const avgRate = rateRows.length
     ? rateRows.reduce((sum, r) => sum + r.comment_rate, 0) / rateRows.length
     : 0;
