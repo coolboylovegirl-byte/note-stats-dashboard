@@ -572,6 +572,81 @@ body::before {
       </div>
     </section>
 
+    <section class="section">
+  <div class="section-title">
+    <span class="dot accent-pink"></span>
+    <h2>コメント分析</h2>
+    <span class="small-badge">COMMENT</span>
+  </div>
+
+  <div class="kpi-grid" style="margin-bottom:16px;">
+    <div class="card pad kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-dot accent-cyan"></span>
+        <div class="kpi-label">Total Comments</div>
+      </div>
+      <div class="kpi-value" id="comment-total">—</div>
+      <div class="kpi-sub" id="comment-total-sub">集計中...</div>
+    </div>
+
+    <div class="card pad kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-dot accent-pink"></span>
+        <div class="kpi-label">Engaged Articles</div>
+      </div>
+      <div class="kpi-value" id="comment-engaged">—</div>
+      <div class="kpi-sub">コメント1件以上の記事数</div>
+    </div>
+
+    <div class="card pad kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-dot accent-gold"></span>
+        <div class="kpi-label">Avg Comment Rate</div>
+      </div>
+      <div class="kpi-value" id="comment-rate">—</div>
+      <div class="kpi-sub">コメント ÷ PV × 100</div>
+    </div>
+
+    <div class="card pad kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-dot accent-violet"></span>
+        <div class="kpi-label">Most Commented</div>
+      </div>
+      <div class="kpi-value" id="comment-max">—</div>
+      <div class="kpi-sub" id="comment-max-title">—</div>
+    </div>
+  </div>
+</section>
+
+<section class="section two-col">
+  <div>
+    <div class="section-title">
+      <span class="dot accent-pink"></span>
+      <h2>コメント数 ランキング TOP 10</h2>
+    </div>
+    <div class="ranking-wrap" id="ranking-comments"></div>
+  </div>
+
+  <div>
+    <div class="section-title">
+      <span class="dot accent-gold"></span>
+      <h2>コメント率 ランキング TOP 10</h2>
+    </div>
+    <div class="ranking-wrap" id="ranking-comment-rate"></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title">
+    <span class="dot accent-pink"></span>
+    <h2>PV × コメント 分布</h2>
+    <span class="small-badge">SCATTER</span>
+  </div>
+  <div class="card chart-card">
+    <div class="chart-wrap"><canvas id="chart-comment-scatter"></canvas></div>
+  </div>
+</section>
+
     <section class="section two-col">
       <div>
         <div class="section-title">
@@ -654,7 +729,185 @@ function escapeHTML(str) {
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
 }
+<script>
+function buildLatestArticleRows(rows) {
+  const byKey = {};
 
+  for (const r of rows) {
+    if (EXCLUDED_TITLES.includes(r.title)) continue;
+
+    const key = r.key || r.title;
+    const commentCount = Number(r.comment_count);
+
+    if (isNaN(commentCount)) continue;
+
+    if (!byKey[key] || r.date > byKey[key].date) {
+      byKey[key] = r;
+    }
+  }
+
+  return Object.values(byKey).map(r => {
+    const pv = Number(r.read_count) || 0;
+    const comments = Number(r.comment_count) || 0;
+    return {
+      key: r.key || '',
+      title: r.title || '',
+      read_count: pv,
+      like_count: Number(r.like_count) || 0,
+      comment_count: comments,
+      comment_rate: pv >= 50 ? (comments / pv) * 100 : null
+    };
+  });
+}
+
+function renderCommentKPIs(rows) {
+  const total = rows.reduce((sum, r) => sum + r.comment_count, 0);
+  const engaged = rows.filter(r => r.comment_count >= 1).length;
+  const rateRows = rows.filter(r => r.comment_rate !== null);
+  const avgRate = rateRows.length
+    ? rateRows.reduce((sum, r) => sum + r.comment_rate, 0) / rateRows.length
+    : 0;
+  const maxRow = rows.reduce((a, b) => (a.comment_count >= b.comment_count ? a : b), rows[0]);
+
+  document.getElementById('comment-total').textContent = total.toLocaleString();
+  document.getElementById('comment-total-sub').textContent = `${rows.length}記事中 ${engaged}記事にコメントあり`;
+  document.getElementById('comment-engaged').textContent = engaged.toLocaleString();
+  document.getElementById('comment-rate').textContent = avgRate.toFixed(3) + '%';
+  document.getElementById('comment-max').textContent = (maxRow?.comment_count || 0).toLocaleString();
+  document.getElementById('comment-max-title').textContent = maxRow?.title || '—';
+}
+
+function buildSimpleRanking(containerId, rows, valueKey, barClass, valClass, formatter) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+
+  if (!rows.length) {
+    el.innerHTML = '<div class="card"><div class="empty-note">データなし</div></div>';
+    return;
+  }
+
+  const max = Math.max(...rows.map(r => Number(r[valueKey]) || 0), 1);
+  const medal = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+
+  el.innerHTML = rows.map((r, i) => {
+    const value = Number(r[valueKey]) || 0;
+    const scaled = (value / max) * 100;
+    const url = buildNoteUrl(r);
+    const titleHTML = url
+      ? `<a class="rank-title rank-link" href="${url}" target="_blank" rel="noopener noreferrer" title="${escapeHTML(r.title)}">${escapeHTML(r.title)}</a>`
+      : `<span class="rank-title" title="${escapeHTML(r.title)}">${escapeHTML(r.title)}</span>`;
+
+    return `
+      <div class="rank-item">
+        <div class="rank-head">
+          <span class="rank-num ${medal(i)}">${String(i + 1).padStart(2, '0')}</span>
+          ${titleHTML}
+        </div>
+        <div class="rank-meta">
+          <span class="rank-val ${valClass}">${formatter(value)}</span>
+          <div class="rank-bar">
+            <div class="rank-bar-fill ${barClass}" style="width:${scaled.toFixed(1)}%"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function buildCommentScatter(rows) {
+  const points = rows.filter(r => r.read_count > 0 && r.comment_count > 0);
+
+  new Chart(document.getElementById('chart-comment-scatter'), {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: '記事',
+        data: points.map(r => ({
+          x: r.read_count,
+          y: r.comment_count,
+          title: r.title,
+          rate: r.comment_rate
+        })),
+        backgroundColor: points.map(r => {
+          if (r.comment_rate === null) return 'rgba(120,198,231,0.7)';
+          if (r.comment_rate >= 0.5) return 'rgba(215,155,199,0.8)';
+          if (r.comment_rate >= 0.1) return 'rgba(228,197,139,0.8)';
+          return 'rgba(120,198,231,0.7)';
+        }),
+        pointRadius: 5,
+        pointHoverRadius: 7
+      }]
+    },
+    options: {
+      ...baseOpts(),
+      plugins: {
+        ...baseOpts().plugins,
+        legend: { display: false },
+        tooltip: {
+          ...baseOpts().plugins.tooltip,
+          callbacks: {
+            title: items => items[0]?.raw?.title || '',
+            label: item => {
+              const d = item.raw;
+              const lines = [
+                `PV: ${Number(d.x).toLocaleString()}`,
+                `コメント: ${Number(d.y).toLocaleString()}件`
+              ];
+              if (d.rate !== null && d.rate !== undefined) {
+                lines.push(`コメント率: ${d.rate.toFixed(3)}%`);
+              }
+              return lines;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: GRID_COLOR },
+          ticks: { color: '#8b83a5' },
+          title: { display: true, text: '累計PV', color: '#8b83a5' }
+        },
+        y: {
+          grid: { color: GRID_COLOR },
+          ticks: { color: '#8b83a5', stepSize: 1 },
+          title: { display: true, text: 'コメント数', color: '#8b83a5' }
+        }
+      }
+    }
+  });
+}
+
+function renderCommentSection(articleRows) {
+  const rows = buildLatestArticleRows(articleRows);
+
+  if (!rows.length) return;
+
+  renderCommentKPIs(rows);
+
+  buildSimpleRanking(
+    'ranking-comments',
+    [...rows].sort((a, b) => b.comment_count - a.comment_count).slice(0, 10),
+    'comment_count',
+    'like-bar',
+    'like-val',
+    v => `${v.toLocaleString()}件`
+  );
+
+  buildSimpleRanking(
+    'ranking-comment-rate',
+    [...rows]
+      .filter(r => r.comment_rate !== null)
+      .sort((a, b) => b.comment_rate - a.comment_rate)
+      .slice(0, 10),
+    'comment_rate',
+    'growth-bar',
+    'growth-val',
+    v => `${v.toFixed(3)}%`
+  );
+
+  buildCommentScatter(rows);
+}
+</script>
 function parseCSV(text) {
   const rows = [];
   let row = [];
@@ -1146,7 +1399,9 @@ async function init() {
     buildGenericTable('weekly-head', 'weekly-body', weekly, 12);
     buildGenericTable('monthly-head', 'monthly-body', monthly, 12);
     buildGenericTable('period-head', 'period-body', period, 50);
-
+    
+renderCommentSection(articles);
+    
   } catch (e) {
     console.error(e);
     document.getElementById('last-updated').textContent = 'error: ' + e.message;
