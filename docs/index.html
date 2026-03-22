@@ -1496,21 +1496,24 @@ function buildLatestArticleRows(rows) {
 
 
   return Object.values(byKey).map(r => {
-    const pv = parseNumber(r.read_count);
-    const likes = parseNumber(r.like_count);
-    const comments = parseNumber(r.comment_count);
+  const pv = parseNumber(r.read_count);
+  const likes = parseNumber(r.like_count);
+  const comments = parseNumber(r.comment_count);
 
-    return {
-      key: r.key || '',
-      title: r.title || '',
-      read_count: pv,
-      like_count: likes,
-      comment_count: comments,
-      comment_rate: pv >= 50 ? (comments / pv) * 100 : null,
-      comment_like_rate: (likes >= 30 && pv >= 300) ? (comments / likes) * 100 : null
-    };
-  });
-}
+  return {
+    key: r.key || '',
+    title: r.title || '',
+    read_count: pv,
+    like_count: likes,
+    comment_count: comments,
+
+    // ⭐ これ追加
+    like_rate: pv > 0 ? (likes / pv) * 100 : null,
+
+    comment_rate: pv >= 50 ? (comments / pv) * 100 : null,
+    comment_like_rate: (likes >= 30 && pv >= 300) ? (comments / likes) * 100 : null
+  };
+});
 
 function renderCommentKPIs(rows) {
   if (!rows || !rows.length) return;
