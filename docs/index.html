@@ -1493,22 +1493,7 @@ function buildLatestArticleRows(rows) {
     }
   }
 
-  return Object.values(byKey).map(r => {
-    const pv = parseNumber(r.read_count);
-    const likes = parseNumber(r.like_count);
-    const comments = parseNumber(r.comment_count);
 
-    return {
-      key: r.key || '',
-      title: r.title || '',
-      read_count: pv,
-      like_count: likes,
-      comment_count: comments,
-      like_rate: pv >= 50 ? (likes / pv) * 100 : null,
-      comment_like_rate: (likes >= 30 && pv >= 300) ? (comments / likes) * 100 : null
-    };
-  });
-}
 
   return Object.values(byKey).map(r => {
     const pv = parseNumber(r.read_count);
@@ -1705,12 +1690,12 @@ function buildCommentScatter(rows) {
           x: r.read_count,
           y: r.comment_count,
           title: r.title,
-          rate: r.comment_rate
+          rate: r.like_rate
         })),
         backgroundColor: points.map(r => {
-          if (r.comment_rate === null) return 'rgba(120,198,231,0.7)';
-          if (r.comment_rate >= 0.5) return 'rgba(215,155,199,0.8)';
-          if (r.comment_rate >= 0.1) return 'rgba(228,197,139,0.8)';
+          if (r.like_rate === null) return 'rgba(120,198,231,0.7)';
+          if (r.like_rate >= 20) return 'rgba(215,155,199,0.8)';
+          if (r.like_rate >= 10) return 'rgba(228,197,139,0.8)';
           return 'rgba(120,198,231,0.7)';
         }),
         pointRadius: 5,
@@ -1733,7 +1718,7 @@ function buildCommentScatter(rows) {
                 `コメント: ${parseNumber(d.y).toLocaleString()}件`
               ];
               if (d.rate !== null && d.rate !== undefined) {
-                lines.push(`コメント率: ${d.rate.toFixed(3)}%`);
+                lines.push(`スキ率: ${d.rate.toFixed(3)}%`);
               }
               return lines;
             }
