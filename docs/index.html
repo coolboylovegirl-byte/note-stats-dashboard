@@ -764,6 +764,7 @@ function buildLatestArticleRows(rows) {
       like_count: Number(r.like_count) || 0,
       comment_count: comments,
       comment_rate: pv >= 50 ? (comments / pv) * 100 : null
+      comment_like_rate: like >= 10 ? (comments / like) * 100 : null
     };
   });
 }
