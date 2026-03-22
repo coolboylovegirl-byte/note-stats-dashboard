@@ -1519,7 +1519,7 @@ function renderCommentKPIs(rows) {
   const totalComments = rows.reduce((sum, r) => sum + parseNumber(r.comment_count), 0);
   const engagedArticles = rows.filter(r => parseNumber(r.comment_count) >= 1).length;
 
-  // ===== Avg Like Rate（ここが修正の本丸）=====
+  // ===== Avg Like Rate =====
   const likeRateRows = rows.filter(r =>
     r.like_rate !== null &&
     r.like_rate !== undefined &&
@@ -1548,7 +1548,13 @@ function renderCommentKPIs(rows) {
 
   // ===== DOM反映 =====
 
-  // 総コメント
+  // 上段KPIのコメント
+  const topCommentsEl = document.getElementById('kpi-comments');
+  if (topCommentsEl) {
+    topCommentsEl.textContent = totalComments.toLocaleString();
+  }
+
+  // コメント分析セクション
   const totalEl = document.getElementById('comment-total');
   if (totalEl) totalEl.textContent = totalComments.toLocaleString();
 
@@ -1557,23 +1563,19 @@ function renderCommentKPIs(rows) {
     totalSubEl.textContent = `${rows.length}記事中 ${engagedArticles}記事にコメントあり`;
   }
 
-  // コメント記事数
   const engagedEl = document.getElementById('comment-engaged');
   if (engagedEl) engagedEl.textContent = engagedArticles.toLocaleString();
 
-  // ⭐ Avg Like Rate（ここが直る）
   const likeRateEl = document.getElementById('like-rate');
   if (likeRateEl) {
     likeRateEl.textContent = avgLikeRate.toFixed(3) + '%';
   }
 
-  // コメント濃度
   const densityEl = document.getElementById('comment-like-rate');
   if (densityEl) {
     densityEl.textContent = avgCommentDensity.toFixed(3) + '%';
   }
 
-  // 最大コメント
   const maxEl = document.getElementById('comment-max');
   if (maxEl) {
     maxEl.textContent = parseNumber(maxRow.comment_count).toLocaleString();
