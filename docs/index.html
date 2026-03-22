@@ -457,6 +457,7 @@ body::before {
   </div>
   <div class="kpi-value" id="kpi-comments">—</div>
   <div class="kpi-sub">累計コメント数</div>
+  </div>
 </div>
       
     </section>
@@ -829,43 +830,6 @@ function renderCommentKPIs(rows) {
   const commentLikeRateEl = document.getElementById('comment-like-rate');
   if (commentLikeRateEl) {
     commentLikeRateEl.textContent = avgLikeRate.toFixed(3) + '%';
-  }
-
-  const commentMaxEl = document.getElementById('comment-max');
-  if (commentMaxEl) {
-    commentMaxEl.textContent = (Number(maxRow?.comment_count) || 0).toLocaleString();
-  }
-
-  const commentMaxTitleEl = document.getElementById('comment-max-title');
-  if (commentMaxTitleEl) {
-    commentMaxTitleEl.textContent = maxRow?.title || '—';
-  }
-}
-  // 上段KPI
-  const topCommentsEl = document.getElementById('kpi-comments');
-  if (topCommentsEl) {
-    topCommentsEl.textContent = total.toLocaleString();
-  }
-
-  // コメント分析セクションKPI
-  const commentTotalEl = document.getElementById('comment-total');
-  if (commentTotalEl) {
-    commentTotalEl.textContent = total.toLocaleString();
-  }
-
-  const commentTotalSubEl = document.getElementById('comment-total-sub');
-  if (commentTotalSubEl) {
-    commentTotalSubEl.textContent = `${rows.length}記事中 ${engaged}記事にコメントあり`;
-  }
-
-  const commentEngagedEl = document.getElementById('comment-engaged');
-  if (commentEngagedEl) {
-    commentEngagedEl.textContent = engaged.toLocaleString();
-  }
-
-  const commentRateEl = document.getElementById('comment-rate');
-  if (commentRateEl) {
-    commentRateEl.textContent = avgRate.toFixed(3) + '%';
   }
 
   const commentMaxEl = document.getElementById('comment-max');
