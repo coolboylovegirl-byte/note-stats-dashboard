@@ -729,7 +729,6 @@ function escapeHTML(str) {
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
 }
-<script>
 function buildLatestArticleRows(rows) {
   const byKey = {};
 
@@ -907,7 +906,6 @@ function renderCommentSection(articleRows) {
 
   buildCommentScatter(rows);
 }
-</script>
 function parseCSV(text) {
   const rows = [];
   let row = [];
