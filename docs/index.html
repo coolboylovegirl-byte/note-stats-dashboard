@@ -1407,6 +1407,14 @@ document.getElementById('last-updated').textContent = `updated ${latest['日付'
     buildGenericTable('weekly-head', 'weekly-body', weekly, 12);
     buildGenericTable('monthly-head', 'monthly-body', monthly, 12);
     buildGenericTable('period-head', 'period-body', period, 50);
+
+    const totalComments = articles.reduce(
+  (sum, r) => sum + (Number(r.comment_count) || 0),
+  0
+);
+
+document.getElementById('kpi-comments').textContent =
+  totalComments.toLocaleString();
     
 renderCommentSection(articles);
     
