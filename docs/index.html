@@ -143,14 +143,14 @@ body::before {
   padding: 16px 14px 40px;
 }
 
-.section { margin-bottom: 16px; }
+.section { margin-bottom: 28px; }
 
 .card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  backdrop-filter: blur(10px);
 }
 
 .card.pad { padding: 16px; }
@@ -186,13 +186,8 @@ body::before {
   box-shadow: 0 6px 18px rgba(169,138,217,0.12);
 }
 
-.tab-panel {
-  display: none;
-}
-
-.tab-panel.active {
-  display: block;
-}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
 
 .kpi-grid {
   display: grid;
@@ -215,6 +210,12 @@ body::before {
   inset: 0;
   background: linear-gradient(135deg, rgba(255,255,255,0.35), transparent 55%);
   pointer-events: none;
+}
+
+.kpi-highlight {
+  background: linear-gradient(135deg, rgba(248,215,227,0.95), rgba(252,234,241,0.92));
+  border: 1px solid #f3b6cc;
+  transform: scale(1.02);
 }
 
 .kpi-top {
@@ -310,7 +311,12 @@ body::before {
   background: rgba(255,255,255,0.65);
 }
 
-.chart-card { padding: 14px 12px 8px; }
+.chart-card {
+  padding: 14px 12px 8px;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(6px);
+}
+
 .chart-wrap { position: relative; height: 260px; }
 .chart-wrap.small { height: 220px; }
 
@@ -593,6 +599,61 @@ body::before {
         </div>
       </section>
 
+      <section class="section">
+        <div class="section-title">
+          <span class="dot accent-rose"></span>
+          <h2>💬 読者の反応（エンゲージメント分析）</h2>
+          <span class="small-badge">COMMENT</span>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-cyan"></span>
+              <div class="kpi-label">Total Comments</div>
+            </div>
+            <div class="kpi-value" id="comment-total">—</div>
+            <div class="kpi-sub" id="comment-total-sub">集計中...</div>
+          </div>
+
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-pink"></span>
+              <div class="kpi-label">Engaged Articles</div>
+            </div>
+            <div class="kpi-value" id="comment-engaged">—</div>
+            <div class="kpi-sub">コメント1件以上の記事数</div>
+          </div>
+
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-gold"></span>
+              <div class="kpi-label">Avg Comment Rate</div>
+            </div>
+            <div class="kpi-value" id="comment-rate">—</div>
+            <div class="kpi-sub">コメント ÷ PV × 100</div>
+          </div>
+
+          <div class="card pad kpi-card kpi-highlight">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-rose"></span>
+              <div class="kpi-label">Comment Density</div>
+            </div>
+            <div class="kpi-value" id="comment-like-rate">—</div>
+            <div class="kpi-sub">コメント ÷ スキ × 100（PV300・スキ30以上）</div>
+          </div>
+
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-violet"></span>
+              <div class="kpi-label">Most Commented</div>
+            </div>
+            <div class="kpi-value" id="comment-max">—</div>
+            <div class="kpi-sub" id="comment-max-title">—</div>
+          </div>
+        </div>
+      </section>
+
       <section class="section two-col">
         <div>
           <div class="section-title">
@@ -608,6 +669,35 @@ body::before {
             <h2>LIKE ランキング TOP 20</h2>
           </div>
           <div class="ranking-wrap" id="ranking-likes"></div>
+        </div>
+      </section>
+
+      <section class="section two-col">
+        <div>
+          <div class="section-title">
+            <span class="dot accent-pink"></span>
+            <h2>コメント数 ランキング TOP 10</h2>
+          </div>
+          <div class="ranking-wrap" id="ranking-comments"></div>
+        </div>
+
+        <div>
+          <div class="section-title">
+            <span class="dot accent-gold"></span>
+            <h2>コメント率 ランキング TOP 10</h2>
+          </div>
+          <div class="ranking-wrap" id="ranking-comment-rate"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <span class="dot accent-pink"></span>
+          <h2>PV × コメント 分布</h2>
+          <span class="small-badge">SCATTER</span>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-wrap"><canvas id="chart-comment-scatter"></canvas></div>
         </div>
       </section>
 
@@ -701,90 +791,6 @@ body::before {
           </div>
         </div>
       </section>
-
-      <section class="section">
-        <div class="section-title">
-          <span class="dot accent-pink"></span>
-          <h2>コメント分析</h2>
-          <span class="small-badge">COMMENT</span>
-        </div>
-
-        <div class="kpi-grid">
-          <div class="card pad kpi-card">
-            <div class="kpi-top">
-              <span class="kpi-dot accent-cyan"></span>
-              <div class="kpi-label">Total Comments</div>
-            </div>
-            <div class="kpi-value" id="comment-total">—</div>
-            <div class="kpi-sub" id="comment-total-sub">集計中...</div>
-          </div>
-
-          <div class="card pad kpi-card">
-            <div class="kpi-top">
-              <span class="kpi-dot accent-pink"></span>
-              <div class="kpi-label">Engaged Articles</div>
-            </div>
-            <div class="kpi-value" id="comment-engaged">—</div>
-            <div class="kpi-sub">コメント1件以上の記事数</div>
-          </div>
-
-          <div class="card pad kpi-card">
-            <div class="kpi-top">
-              <span class="kpi-dot accent-gold"></span>
-              <div class="kpi-label">Avg Comment Rate</div>
-            </div>
-            <div class="kpi-value" id="comment-rate">—</div>
-            <div class="kpi-sub">コメント ÷ PV × 100</div>
-          </div>
-
-          <div class="card pad kpi-card">
-            <div class="kpi-top">
-              <span class="kpi-dot accent-rose"></span>
-              <div class="kpi-label">Comment Density</div>
-            </div>
-            <div class="kpi-value" id="comment-like-rate">—</div>
-            <div class="kpi-sub">コメント ÷ スキ × 100（PV300・スキ30以上）</div>
-          </div>
-
-          <div class="card pad kpi-card">
-            <div class="kpi-top">
-              <span class="kpi-dot accent-violet"></span>
-              <div class="kpi-label">Most Commented</div>
-            </div>
-            <div class="kpi-value" id="comment-max">—</div>
-            <div class="kpi-sub" id="comment-max-title">—</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section two-col">
-        <div>
-          <div class="section-title">
-            <span class="dot accent-pink"></span>
-            <h2>コメント数 ランキング TOP 10</h2>
-          </div>
-          <div class="ranking-wrap" id="ranking-comments"></div>
-        </div>
-
-        <div>
-          <div class="section-title">
-            <span class="dot accent-gold"></span>
-            <h2>コメント率 ランキング TOP 10</h2>
-          </div>
-          <div class="ranking-wrap" id="ranking-comment-rate"></div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="section-title">
-          <span class="dot accent-pink"></span>
-          <h2>PV × コメント 分布</h2>
-          <span class="small-badge">SCATTER</span>
-        </div>
-        <div class="card chart-card">
-          <div class="chart-wrap"><canvas id="chart-comment-scatter"></canvas></div>
-        </div>
-      </section>
     </section>
 
     <!-- WEEKLY -->
@@ -796,14 +802,14 @@ body::before {
           <span class="small-badge">WEEK</span>
         </div>
         <div class="kpi-grid four">
-      <div class="card pad kpi-card">
-  <div class="kpi-top">
-    <span class="kpi-dot accent-cyan"></span>
-    <div class="kpi-label">Week</div>
-  </div>
-  <div class="kpi-value" id="weekly-kpi-label">—</div>
-  <div id="weekly-kpi-range" class="kpi-sub">最新週</div>
-</div>
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-cyan"></span>
+              <div class="kpi-label">Week</div>
+            </div>
+            <div class="kpi-value" id="weekly-kpi-label">—</div>
+            <div id="weekly-kpi-range" class="kpi-sub">最新週</div>
+          </div>
 
           <div class="card pad kpi-card">
             <div class="kpi-top">
@@ -848,10 +854,10 @@ body::before {
         <div>
           <div class="section-title">
             <span class="dot accent-rose"></span>
-            <h2>週次コメント / フォロワー</h2>
+            <h2>週次コメント</h2>
           </div>
           <div class="card chart-card">
-            <div class="chart-wrap small"><canvas id="chart-weekly-secondary"></canvas></div>
+            <div class="chart-wrap small"><canvas id="chart-weekly-comments"></canvas></div>
           </div>
         </div>
       </section>
@@ -891,7 +897,7 @@ body::before {
               <div class="kpi-label">Month</div>
             </div>
             <div class="kpi-value" id="monthly-kpi-label">—</div>
-            <div class="kpi-sub">最新月</div>
+            <div id="monthly-kpi-range" class="kpi-sub">最新月</div>
           </div>
 
           <div class="card pad kpi-card">
@@ -937,10 +943,10 @@ body::before {
         <div>
           <div class="section-title">
             <span class="dot accent-rose"></span>
-            <h2>月次コメント / フォロワー</h2>
+            <h2>月次コメント</h2>
           </div>
           <div class="card chart-card">
-            <div class="chart-wrap small"><canvas id="chart-monthly-secondary"></canvas></div>
+            <div class="chart-wrap small"><canvas id="chart-monthly-comments"></canvas></div>
           </div>
         </div>
       </section>
@@ -1470,7 +1476,6 @@ function buildGenericTable(headId, bodyId, rows, limit = 20) {
   `).join('');
 }
 
-/* コメント分析 */
 function buildLatestArticleRows(rows) {
   const byKey = {};
 
@@ -1507,8 +1512,8 @@ function buildLatestArticleRows(rows) {
 function renderCommentKPIs(rows) {
   if (!rows.length) return;
 
-  const total = rows.reduce((sum, r) => sum + (parseNumber(r.comment_count) || 0), 0);
-  const engaged = rows.filter(r => (parseNumber(r.comment_count) || 0) >= 1).length;
+  const total = rows.reduce((sum, r) => sum + parseNumber(r.comment_count), 0);
+  const engaged = rows.filter(r => parseNumber(r.comment_count) >= 1).length;
 
   const rateRows = rows.filter(r => r.comment_rate !== null);
   const avgRate = rateRows.length
@@ -1521,7 +1526,7 @@ function renderCommentKPIs(rows) {
     : 0;
 
   const maxRow = rows.reduce((a, b) =>
-    (parseNumber(a.comment_count) || 0) >= (parseNumber(b.comment_count) || 0) ? a : b
+    parseNumber(a.comment_count) >= parseNumber(b.comment_count) ? a : b
   , rows[0]);
 
   const topCommentsEl = document.getElementById('kpi-comments');
@@ -1543,7 +1548,7 @@ function renderCommentKPIs(rows) {
   if (commentLikeRateEl) commentLikeRateEl.textContent = avgLikeRate.toFixed(3) + '%';
 
   const commentMaxEl = document.getElementById('comment-max');
-  if (commentMaxEl) commentMaxEl.textContent = (parseNumber(maxRow?.comment_count) || 0).toLocaleString();
+  if (commentMaxEl) commentMaxEl.textContent = parseNumber(maxRow?.comment_count).toLocaleString();
 
   const commentMaxTitleEl = document.getElementById('comment-max-title');
   if (commentMaxTitleEl) commentMaxTitleEl.textContent = maxRow?.title || '—';
@@ -1682,8 +1687,7 @@ function renderCommentSection(articleRows) {
   buildCommentScatter(rows);
 }
 
-/* Weekly / Monthly */
-  function getWeekOfMonth(dateStr) {
+function getWeekOfMonth(dateStr) {
   const d = new Date(dateStr);
   if (isNaN(d)) return '';
   const year = d.getFullYear();
@@ -1702,10 +1706,10 @@ function normalizeWeeklySnapshotRows(rows) {
     end: r.end_date || '',
     views: parseNumber(r.views),
     likes: parseNumber(r.likes),
-    comments: parseNumber(r.comments),
-    followers: 0
+    comments: parseNumber(r.comments)
   })).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
 }
+
 function aggregatePeriodRows(rows, type = 'weekly') {
   if (!rows.length) return [];
 
@@ -1717,7 +1721,6 @@ function aggregatePeriodRows(rows, type = 'weekly') {
   const pvKey = findColumn(rows[0], ['期間増加PV', 'ビュー増加', '週次PV', '月次PV', 'pv', 'views']);
   const likeKey = findColumn(rows[0], ['期間増加スキ', 'スキ増加', '週次スキ', '月次スキ', 'likes']);
   const commentKey = findColumn(rows[0], ['期間増加コメント', 'コメント増加', '週次コメント', '月次コメント', 'comments']);
-  const followerKey = findColumn(rows[0], ['期間増加フォロワー', 'フォロワー増加', '週次フォロワー', '月次フォロワー', 'followers']);
 
   const map = new Map();
 
@@ -1757,8 +1760,7 @@ function aggregatePeriodRows(rows, type = 'weekly') {
         end: endKey ? r[endKey] || '' : '',
         views: 0,
         likes: 0,
-        comments: 0,
-        followers: 0
+        comments: 0
       });
     }
 
@@ -1766,10 +1768,13 @@ function aggregatePeriodRows(rows, type = 'weekly') {
     item.views += parseNumber(pvKey ? r[pvKey] : 0);
     item.likes += parseNumber(likeKey ? r[likeKey] : 0);
     item.comments += parseNumber(commentKey ? r[commentKey] : 0);
-    item.followers += parseNumber(followerKey ? r[followerKey] : 0);
   });
 
-  return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
+  return Array.from(map.values()).sort((a, b) => {
+    const aKey = a.start || a.label;
+    const bKey = b.start || b.label;
+    return aKey.localeCompare(bKey);
+  });
 }
 
 function buildPeriodKPIs(rows, prefix, type = 'weekly', snapshotRows = null) {
@@ -1800,7 +1805,7 @@ function buildPeriodKPIs(rows, prefix, type = 'weekly', snapshotRows = null) {
   }
 }
 
-function buildPeriodChart(rows, canvasId, mode = 'primary', type = 'weekly', snapshotRows = null) {
+function buildPeriodPrimaryChart(rows, canvasId, type = 'weekly', snapshotRows = null) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
@@ -1814,11 +1819,11 @@ function buildPeriodChart(rows, canvasId, mode = 'primary', type = 'weekly', sna
   const labels = aggregated.map(r => r.label);
   const views = aggregated.map(r => r.views);
   const likes = aggregated.map(r => r.likes);
-  const comments = aggregated.map(r => r.comments);
-  const followers = aggregated.map(r => r.followers);
 
-  const datasets = mode === 'primary'
-    ? [
+  new Chart(canvas, {
+    data: {
+      labels,
+      datasets: [
         {
           type: 'bar',
           label: 'スキ',
@@ -1843,34 +1848,7 @@ function buildPeriodChart(rows, canvasId, mode = 'primary', type = 'weekly', sna
           yAxisID: 'y'
         }
       ]
-    : [
-        {
-          type: 'bar',
-          label: 'コメント',
-          data: comments,
-          backgroundColor: 'rgba(231,169,188,0.55)',
-          borderColor: 'rgba(231,169,188,0.95)',
-          borderWidth: 1,
-          borderRadius: 6,
-          yAxisID: 'y1'
-        },
-        {
-          type: 'line',
-          label: 'フォロワー増',
-          data: followers,
-          borderColor: '#a98ad9',
-          backgroundColor: 'rgba(169,138,217,0.10)',
-          fill: true,
-          tension: 0.35,
-          pointRadius: 0,
-          pointHoverRadius: 4,
-          borderWidth: 2,
-          yAxisID: 'y'
-        }
-      ];
-
-  new Chart(canvas, {
-    data: { labels, datasets },
+    },
     options: {
       ...baseOpts(),
       scales: {
@@ -1893,7 +1871,56 @@ function buildPeriodChart(rows, canvasId, mode = 'primary', type = 'weekly', sna
   });
 }
 
-  
+function buildPeriodCommentsChart(rows, canvasId, type = 'weekly', snapshotRows = null) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+
+  const aggregated =
+    (type === 'weekly' && snapshotRows && snapshotRows.length)
+      ? normalizeWeeklySnapshotRows(snapshotRows)
+      : aggregatePeriodRows(rows, type);
+
+  if (!aggregated.length) return;
+
+  const labels = aggregated.map(r => r.label);
+  const comments = aggregated.map(r => r.comments);
+
+  new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'コメント',
+        data: comments,
+        backgroundColor: aggregated.map((_, i) =>
+          i === aggregated.length - 1
+            ? 'rgba(255, 180, 200, 0.80)'
+            : 'rgba(231,169,188,0.55)'
+        ),
+        borderColor: aggregated.map((_, i) =>
+          i === aggregated.length - 1
+            ? 'rgba(255, 140, 170, 1)'
+            : 'rgba(231,169,188,0.95)'
+        ),
+        borderWidth: 1,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      ...baseOpts(),
+      scales: {
+        x: {
+          grid: { color: GRID_COLOR },
+          ticks: { color: '#8b83a5', maxTicksLimit: 8 }
+        },
+        y: {
+          grid: { color: GRID_COLOR },
+          ticks: { color: '#8b83a5' }
+        }
+      }
+    }
+  });
+}
 
 function setupTabs() {
   const buttons = document.querySelectorAll('.tab-btn');
@@ -1925,22 +1952,22 @@ async function init() {
 
   try {
     const [
-  summary,
-  articles,
-  trend,
-  assets,
-  weekly,
-  monthly,
-  weeklySnapshot
-] = await Promise.all([
-  fetchCSV('daily_summary'),
-  fetchCSV('articles'),
-  fetchCSV('trend_analysis'),
-  fetchCSV('asset_articles'),
-  fetchCSV('weekly_summary'),
-  fetchCSV('monthly_summary'),
-  fetchCSV('weekly_snapshot')
-]);
+      summary,
+      articles,
+      trend,
+      assets,
+      weekly,
+      monthly,
+      weeklySnapshot
+    ] = await Promise.all([
+      fetchCSV('daily_summary'),
+      fetchCSV('articles'),
+      fetchCSV('trend_analysis'),
+      fetchCSV('asset_articles'),
+      fetchCSV('weekly_summary'),
+      fetchCSV('monthly_summary'),
+      fetchCSV('weekly_snapshot')
+    ]);
 
     let followers = [];
     try {
@@ -1960,6 +1987,7 @@ async function init() {
     setDiff('kpi-likes-diff', parseFloat(getField(latest, ['スキ前日比(%)'])));
 
     buildDaily(summary);
+    renderCommentSection(articles);
     buildRanking('ranking-views', articles, 'read_count', 'view-bar', 'view-val');
     buildRanking('ranking-likes', articles, 'like_count', 'like-bar', 'like-val');
     buildGrowthRanking('ranking-growth', articles);
@@ -1968,18 +1996,17 @@ async function init() {
     buildAssetTable(assets);
     buildTrendDetailed(trend);
 
-    renderCommentSection(articles);
-
     buildGenericTable('weekly-head', 'weekly-body', weekly, 30);
     buildGenericTable('monthly-head', 'monthly-body', monthly, 24);
 
-buildPeriodKPIs(weekly, 'weekly', 'weekly', weeklySnapshot);
-buildPeriodKPIs(monthly, 'monthly', 'monthly');
+    buildPeriodKPIs(weekly, 'weekly', 'weekly', weeklySnapshot);
+    buildPeriodKPIs(monthly, 'monthly', 'monthly');
 
-buildPeriodChart(weekly, 'chart-weekly', 'primary', 'weekly', weeklySnapshot);
-buildPeriodChart(weekly, 'chart-weekly-secondary', 'secondary', 'weekly', weeklySnapshot);
-buildPeriodChart(monthly, 'chart-monthly', 'primary', 'monthly');
-buildPeriodChart(monthly, 'chart-monthly-secondary', 'secondary', 'monthly');
+    buildPeriodPrimaryChart(weekly, 'chart-weekly', 'weekly', weeklySnapshot);
+    buildPeriodCommentsChart(weekly, 'chart-weekly-comments', 'weekly', weeklySnapshot);
+
+    buildPeriodPrimaryChart(monthly, 'chart-monthly', 'monthly');
+    buildPeriodCommentsChart(monthly, 'chart-monthly-comments', 'monthly');
 
   } catch (e) {
     console.error(e);
