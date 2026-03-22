@@ -1683,6 +1683,29 @@ function renderCommentSection(articleRows) {
 }
 
 /* Weekly / Monthly */
+  function getWeekOfMonth(dateStr) {
+  const d = new Date(dateStr);
+  if (isNaN(d)) return '';
+  const year = d.getFullYear();
+  const month = d.getMonth() + 1;
+  const day = d.getDate();
+  const weekOfMonth = Math.floor((day - 1) / 7) + 1;
+  return `${year}年${month}月${weekOfMonth}週目`;
+}
+
+function normalizeWeeklySnapshotRows(rows) {
+  if (!rows || !rows.length) return [];
+
+  return rows.map(r => ({
+    label: getWeekOfMonth(r.start_date),
+    start: r.start_date || '',
+    end: r.end_date || '',
+    views: parseNumber(r.views),
+    likes: parseNumber(r.likes),
+    comments: parseNumber(r.comments),
+    followers: 0
+  })).sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+}
 function aggregatePeriodRows(rows, type = 'weekly') {
   if (!rows.length) return [];
 
@@ -1749,8 +1772,12 @@ function aggregatePeriodRows(rows, type = 'weekly') {
   return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
 }
 
-function buildPeriodKPIs(rows, prefix, type = 'weekly') {
-  const aggregated = aggregatePeriodRows(rows, type);
+function buildPeriodKPIs(rows, prefix, type = 'weekly', snapshotRows = null) {
+  const aggregated =
+    (type === 'weekly' && snapshotRows && snapshotRows.length)
+      ? normalizeWeeklySnapshotRows(snapshotRows)
+      : aggregatePeriodRows(rows, type);
+
   if (!aggregated.length) return;
 
   const latest = aggregated[aggregated.length - 1];
@@ -1765,7 +1792,6 @@ function buildPeriodKPIs(rows, prefix, type = 'weekly') {
     if (latest.start && latest.end) {
       const s = new Date(latest.start);
       const e = new Date(latest.end);
-
       const format = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
       rangeEl.textContent = `${format(s)}〜${format(e)}`;
     } else {
@@ -1774,11 +1800,15 @@ function buildPeriodKPIs(rows, prefix, type = 'weekly') {
   }
 }
 
-function buildPeriodChart(rows, canvasId, mode = 'primary', type = 'weekly') {
+function buildPeriodChart(rows, canvasId, mode = 'primary', type = 'weekly', snapshotRows = null) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
-  const aggregated = aggregatePeriodRows(rows, type);
+  const aggregated =
+    (type === 'weekly' && snapshotRows && snapshotRows.length)
+      ? normalizeWeeklySnapshotRows(snapshotRows)
+      : aggregatePeriodRows(rows, type);
+
   if (!aggregated.length) return;
 
   const labels = aggregated.map(r => r.label);
@@ -1895,20 +1925,22 @@ async function init() {
 
   try {
     const [
-      summary,
-      articles,
-      trend,
-      assets,
-      weekly,
-      monthly
-    ] = await Promise.all([
-      fetchCSV('daily_summary'),
-      fetchCSV('articles'),
-      fetchCSV('trend_analysis'),
-      fetchCSV('asset_articles'),
-      fetchCSV('weekly_summary'),
-      fetchCSV('monthly_summary')
-    ]);
+  summary,
+  articles,
+  trend,
+  assets,
+  weekly,
+  monthly,
+  weeklySnapshot
+] = await Promise.all([
+  fetchCSV('daily_summary'),
+  fetchCSV('articles'),
+  fetchCSV('trend_analysis'),
+  fetchCSV('asset_articles'),
+  fetchCSV('weekly_summary'),
+  fetchCSV('monthly_summary'),
+  fetchCSV('weekly_snapshot')
+]);
 
     let followers = [];
     try {
@@ -1941,11 +1973,11 @@ async function init() {
     buildGenericTable('weekly-head', 'weekly-body', weekly, 30);
     buildGenericTable('monthly-head', 'monthly-body', monthly, 24);
 
-buildPeriodKPIs(weekly, 'weekly', 'weekly');
+buildPeriodKPIs(weekly, 'weekly', 'weekly', weeklySnapshot);
 buildPeriodKPIs(monthly, 'monthly', 'monthly');
 
-    buildPeriodChart(weekly, 'chart-weekly', 'primary', 'weekly');
-buildPeriodChart(weekly, 'chart-weekly-secondary', 'secondary', 'weekly');
+buildPeriodChart(weekly, 'chart-weekly', 'primary', 'weekly', weeklySnapshot);
+buildPeriodChart(weekly, 'chart-weekly-secondary', 'secondary', 'weekly', weeklySnapshot);
 buildPeriodChart(monthly, 'chart-monthly', 'primary', 'monthly');
 buildPeriodChart(monthly, 'chart-monthly-secondary', 'secondary', 'monthly');
 
