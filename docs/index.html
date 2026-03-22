@@ -796,14 +796,14 @@ body::before {
           <span class="small-badge">WEEK</span>
         </div>
         <div class="kpi-grid four">
-          <div class="card pad kpi-card">
-            <div class="kpi-top">
-              <span class="kpi-dot accent-cyan"></span>
-              <div class="kpi-label">Week</div>
-            </div>
-            <div class="kpi-value" id="weekly-kpi-label">—</div>
-            <div class="kpi-sub">最新週</div>
-          </div>
+      <div class="card pad kpi-card">
+  <div class="kpi-top">
+    <span class="kpi-dot accent-cyan"></span>
+    <div class="kpi-label">Week</div>
+  </div>
+  <div class="kpi-value" id="weekly-kpi-label">—</div>
+  <div id="weekly-kpi-range" class="kpi-sub">最新週</div>
+</div>
 
           <div class="card pad kpi-card">
             <div class="kpi-top">
@@ -1701,21 +1701,28 @@ function aggregatePeriodRows(rows, type = 'weekly') {
   rows.forEach(r => {
     let label = '';
 
-if (type === 'weekly') {
-  const startDateStr = startKey ? r[startKey] : '';
-  const startDate = startDateStr ? new Date(startDateStr) : null;
+    if (type === 'weekly') {
+      const startDateStr = startKey ? r[startKey] : '';
+      const startDate = startDateStr ? new Date(startDateStr) : null;
 
-  if (startDate && !isNaN(startDate)) {
-    const month = startDate.getMonth() + 1;
-    const day = startDate.getDate();
-    const weekOfMonth = Math.floor((day - 1) / 7) + 1;
-  label = `${year}年${month}月${weekOfMonth}週目`;
-  } else {
-    const year = yearKey ? r[yearKey] : '';
-    const week = weekKey ? r[weekKey] : '';
-    label = year && week ? `${year}-W${String(week).padStart(2, '0')}` : (week || '—');
-  }
-} else {
+      if (startDate && !isNaN(startDate)) {
+        const year = startDate.getFullYear();
+        const month = startDate.getMonth() + 1;
+        const day = startDate.getDate();
+        const weekOfMonth = Math.floor((day - 1) / 7) + 1;
+        label = `${year}年${month}月${weekOfMonth}週目`;
+      } else {
+        const year = yearKey ? r[yearKey] : '';
+        const week = weekKey ? r[weekKey] : '';
+        label = year && week ? `${year}-W${String(week).padStart(2, '0')}` : (week || '—');
+      }
+    } else {
+      const month = monthKey ? r[monthKey] : '';
+      if (month) {
+        label = month;
+      } else if (startKey && r[startKey]) {
+        label = String(r[startKey]).slice(0, 7);
+      } else {
         label = '—';
       }
     }
@@ -1752,6 +1759,19 @@ function buildPeriodKPIs(rows, prefix, type = 'weekly') {
   document.getElementById(`${prefix}-kpi-views`).textContent = latest.views.toLocaleString();
   document.getElementById(`${prefix}-kpi-likes`).textContent = latest.likes.toLocaleString();
   document.getElementById(`${prefix}-kpi-comments`).textContent = latest.comments.toLocaleString();
+
+  const rangeEl = document.getElementById(`${prefix}-kpi-range`);
+  if (rangeEl) {
+    if (latest.start && latest.end) {
+      const s = new Date(latest.start);
+      const e = new Date(latest.end);
+
+      const format = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
+      rangeEl.textContent = `${format(s)}〜${format(e)}`;
+    } else {
+      rangeEl.textContent = type === 'weekly' ? '最新週' : '最新月';
+    }
+  }
 }
 
 function buildPeriodChart(rows, canvasId, mode = 'primary', type = 'weekly') {
