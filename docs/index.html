@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>note / stats - ねんころ mobile</title>
+<title>note / stats - ねんころ dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
 <style>
@@ -56,7 +56,7 @@ body::before {
   opacity: 0.7;
 }
 
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-thumb { background: rgba(154, 139, 198, 0.25); border-radius: 999px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
@@ -69,7 +69,7 @@ body::before {
   border-bottom: 1px solid var(--border);
 }
 .header-inner {
-  max-width: 560px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 14px 16px;
   display: flex;
@@ -126,14 +126,12 @@ body::before {
 }
 
 .app {
-  max-width: 560px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 16px 14px 40px;
 }
 
-.section {
-  margin-bottom: 16px;
-}
+.section { margin-bottom: 16px; }
 .card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -145,7 +143,7 @@ body::before {
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
 }
 .kpi-card {
@@ -180,7 +178,7 @@ body::before {
 .kpi-value {
   font-family: var(--round);
   font-weight: 700;
-  font-size: clamp(34px, 10vw, 48px);
+  font-size: clamp(30px, 4vw, 46px);
   line-height: 1;
   letter-spacing: -0.03em;
   margin-bottom: 8px;
@@ -205,6 +203,7 @@ body::before {
 .kpi-articles .kpi-value { color: #d9b56f; }
 .kpi-followers .kpi-dot, .accent-violet { background: var(--violet); }
 .kpi-followers .kpi-value { color: #9b80db; }
+.accent-rose { background: var(--rose); }
 
 .section-title {
   display: flex;
@@ -235,15 +234,14 @@ body::before {
   background: rgba(255,255,255,0.65);
 }
 
-.chart-card {
-  padding: 14px 12px 8px;
-}
-.chart-wrap {
-  position: relative;
-  height: 250px;
-}
-.chart-wrap.small {
-  height: 220px;
+.chart-card { padding: 14px 12px 8px; }
+.chart-wrap { position: relative; height: 260px; }
+.chart-wrap.small { height: 220px; }
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
 .ranking-wrap {
@@ -273,15 +271,17 @@ body::before {
 .rank-num.gold { color: #c8a45f; }
 .rank-num.silver { color: #9aa3b8; }
 .rank-num.bronze { color: #c68f77; }
-.rank-title {
+.rank-title, .rank-link {
   font-size: 14px;
   line-height: 1.55;
   color: var(--text);
+  text-decoration: none;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.rank-link:hover { color: var(--violet); }
 .rank-meta {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -308,19 +308,17 @@ body::before {
 }
 .view-bar { background: linear-gradient(90deg, #8bd8ec, #74c3f0); }
 .like-bar { background: linear-gradient(90deg, #ebb0d2, #d89bcb); }
+.growth-bar { background: linear-gradient(90deg, #9ae0cc, #7ac8cf); }
 .view-val { color: #5db9d5; }
 .like-val { color: #cb86b3; }
+.growth-val { color: #5fb9a7; }
 
-.table-card {
-  overflow: hidden;
-}
+.table-card { overflow: hidden; }
 .table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
-.table-inner {
-  min-width: 660px;
-}
+.table-inner { min-width: 760px; }
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -330,6 +328,7 @@ body::before {
   padding: 10px 12px;
   border-bottom: 1px solid rgba(126, 103, 164, 0.10);
   text-align: left;
+  vertical-align: top;
 }
 .data-table th {
   font-size: 11px;
@@ -373,12 +372,24 @@ body::before {
 .badge-grow { color: #65b9a7; background: rgba(101, 185, 167, 0.12); }
 .badge-idle { color: var(--text3); background: rgba(126, 103, 164, 0.08); }
 
+.empty-note {
+  padding: 16px;
+  color: var(--text2);
+  font-size: 13px;
+}
+
 .footer-space { height: 8px; }
 
-@media (min-width: 700px) {
-  .app { max-width: 680px; }
-  .header-inner { max-width: 680px; }
+@media (max-width: 900px) {
   .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .app, .header-inner { max-width: 680px; }
+}
+
+@media (max-width: 640px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+  .brand-main { font-size: 24px; }
+  .brand-sub { font-size: 20px; }
 }
 </style>
 </head>
@@ -452,48 +463,52 @@ body::before {
       </div>
     </section>
 
-    <section class="section">
-      <div class="section-title">
-        <span class="dot accent-cyan"></span>
-        <h2>VIEW ランキング TOP 20</h2>
+    <section class="section two-col">
+      <div>
+        <div class="section-title">
+          <span class="dot accent-cyan"></span>
+          <h2>VIEW ランキング TOP 20</h2>
+        </div>
+        <div class="ranking-wrap" id="ranking-views"></div>
       </div>
-      <div class="ranking-wrap" id="ranking-views"></div>
-    </section>
 
-    <section class="section">
-      <div class="section-title">
-        <span class="dot accent-pink"></span>
-        <h2>LIKE ランキング TOP 20</h2>
-      </div>
-      <div class="ranking-wrap" id="ranking-likes"></div>
-    </section>
-
-    <section class="section">
-  <div class="section-title">
-    <span class="dot accent-rose"></span>
-    <h2>直近7日 急上昇ランキング</h2>
-    <span class="small-badge">+7D PV</span>
-  </div>
-  <div class="ranking-wrap" id="ranking-growth"></div>
-</section>
-    
-    <section class="section">
-      <div class="section-title">
-        <span class="dot accent-violet"></span>
-        <h2>フォロワー 日次推移</h2>
-      </div>
-      <div class="card chart-card">
-        <div class="chart-wrap small"><canvas id="chart-followers"></canvas></div>
+      <div>
+        <div class="section-title">
+          <span class="dot accent-pink"></span>
+          <h2>LIKE ランキング TOP 20</h2>
+        </div>
+        <div class="ranking-wrap" id="ranking-likes"></div>
       </div>
     </section>
 
     <section class="section">
       <div class="section-title">
-        <span class="dot accent-violet"></span>
-        <h2>4象限マップ｜PV × スキ率</h2>
+        <span class="dot accent-rose"></span>
+        <h2>直近7日 急上昇ランキング</h2>
+        <span class="small-badge">+7D PV</span>
       </div>
-      <div class="card chart-card">
-        <div class="chart-wrap"><canvas id="chart-quad"></canvas></div>
+      <div class="ranking-wrap" id="ranking-growth"></div>
+    </section>
+
+    <section class="section two-col">
+      <div>
+        <div class="section-title">
+          <span class="dot accent-violet"></span>
+          <h2>フォロワー 日次推移</h2>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-wrap small"><canvas id="chart-followers"></canvas></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">
+          <span class="dot accent-violet"></span>
+          <h2>4象限マップ｜PV × スキ率</h2>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-wrap small"><canvas id="chart-quad"></canvas></div>
+        </div>
       </div>
     </section>
 
@@ -508,6 +523,8 @@ body::before {
             <table class="data-table">
               <thead>
                 <tr>
+                  <th>#</th>
+                  <th>タイトル</th>
                   <th>期間PV増加</th>
                   <th>稼働日数</th>
                   <th>推移</th>
@@ -555,32 +572,140 @@ body::before {
       </div>
     </section>
 
+    <section class="section two-col">
+      <div>
+        <div class="section-title">
+          <span class="dot accent-cyan"></span>
+          <h2>週次サマリー</h2>
+        </div>
+        <div class="card table-card">
+          <div class="table-wrap">
+            <div class="table-inner">
+              <table class="data-table">
+                <thead id="weekly-head"></thead>
+                <tbody id="weekly-body">
+                  <tr><td>読み込み中...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">
+          <span class="dot accent-pink"></span>
+          <h2>月次サマリー</h2>
+        </div>
+        <div class="card table-card">
+          <div class="table-wrap">
+            <div class="table-inner">
+              <table class="data-table">
+                <thead id="monthly-head"></thead>
+                <tbody id="monthly-body">
+                  <tr><td>読み込み中...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <span class="dot accent-gold"></span>
+        <h2>期間ランキング</h2>
+      </div>
+      <div class="card table-card">
+        <div class="table-wrap">
+          <div class="table-inner">
+            <table class="data-table">
+              <thead id="period-head"></thead>
+              <tbody id="period-body">
+                <tr><td>読み込み中...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <div class="footer-space"></div>
   </main>
 
 <script>
 const CONFIG = {
-  repo: 'coolboylovegirl-byte/note-stats-dashboard',
+  repo: 'coolboylovegirl-byte/note-stats-tracker',
+  branch: 'main',
   dataPath: 'data',
   excludeTitles: [],
-  noteUsername: 'nenkoro_life' // ← トモちゃんのnoteユーザー名に変更してOK
+  noteUsername: 'nenkoro_life'
 };
 
 const EXCLUDED_TITLES = CONFIG.excludeTitles;
-const BASE = `https://raw.githubusercontent.com/${CONFIG.repo}/main/${CONFIG.dataPath}/`;
+const BASE = `https://raw.githubusercontent.com/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.dataPath}/`;
+
+function escapeHTML(str) {
+  return String(str ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let cell = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const next = text[i + 1];
+
+    if (char === '"') {
+      if (inQuotes && next === '"') {
+        cell += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      row.push(cell);
+      cell = '';
+    } else if ((char === '\n' || char === '\r') && !inQuotes) {
+      if (char === '\r' && next === '\n') i++;
+      row.push(cell);
+      if (row.some(v => v !== '')) rows.push(row);
+      row = [];
+      cell = '';
+    } else {
+      cell += char;
+    }
+  }
+
+  if (cell.length > 0 || row.length > 0) {
+    row.push(cell);
+    if (row.some(v => v !== '')) rows.push(row);
+  }
+
+  if (!rows.length) return [];
+
+  const headers = rows[0].map(h => h.trim());
+  return rows.slice(1).map(cols => {
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = (cols[i] ?? '').trim());
+    return obj;
+  });
+}
 
 async function fetchCSV(name) {
   const res = await fetch(BASE + name + '.csv?t=' + Date.now());
-  if (!res.ok) throw new Error(name + ' not found');
+  if (!res.ok) throw new Error(name + '.csv not found');
   const text = await res.text();
-  const lines = text.trim().split('\n');
-  const headers = lines[0].split(',').map(h => h.trim());
-  return lines.slice(1).map(line => {
-    const vals = line.split(',');
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = (vals[i] || '').trim());
-    return obj;
-  });
+  return parseCSV(text);
 }
 
 const GRID_COLOR = 'rgba(118,109,144,0.10)';
@@ -591,7 +716,7 @@ Chart.defaults.font.size = 11;
 const baseOpts = () => ({
   responsive: true,
   maintainAspectRatio: false,
-  animation: { duration: 900, easing: 'easeOutQuart' },
+  animation: { duration: 700, easing: 'easeOutQuart' },
   plugins: {
     legend: {
       display: true,
@@ -637,7 +762,7 @@ function setDiff(id, val) {
 
 function buildDaily(rows) {
   const r = rows.slice(-60);
-  const labels = r.map(d => d['日付'] ? d['日付'].slice(5) : '');
+  const labels = r.map(d => (d['日付'] || '').slice(5));
   const views = r.map(d => Number(d['ビュー合計']) || 0);
   const likes = r.map(d => Number(d['スキ合計']) || 0);
 
@@ -654,7 +779,7 @@ function buildDaily(rows) {
           borderColor: 'rgba(215,155,199,0.9)',
           borderWidth: 1,
           yAxisID: 'y1',
-          borderRadius: 6,
+          borderRadius: 6
         },
         {
           type: 'line',
@@ -693,139 +818,17 @@ function buildDaily(rows) {
   });
 }
 
-function buildNoteUrl(row) {
-  if (!CONFIG.noteUsername || !row.key) return null;
-  return `https://note.com/${CONFIG.noteUsername}/n/${row.key}`;
-}
-
-function buildRanking(containerId, rows, valueKey, barClass, valClass) {
-  if (!rows.length) return;
-
-  const latest = rows.reduce((a, b) => a.date > b.date ? a : b).date;
-  const sorted = rows
-    .filter(r => r.date === latest && !EXCLUDED_TITLES.includes(r.title))
-    .sort((a, b) => Number(b[valueKey]) - Number(a[valueKey]))
-    .slice(0, 20);
-
-  const max = Math.max(...sorted.map(r => Number(r[valueKey]) || 0), 1);
-  const medal = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-
-  document.getElementById(containerId).innerHTML = sorted.map((r, i) => {
-    const value = Number(r[valueKey]) || 0;
-    const scaled = max > 1
-      ? (Math.log10(value + 1) / Math.log10(max + 1)) * 67 + 18
-      : 18;
-
-    const url = buildNoteUrl(r);
-
-    const titleHTML = url
-      ? `<a class="rank-title rank-link" href="${url}" target="_blank" rel="noopener noreferrer" title="${r.title}">${r.title}</a>`
-      : `<span class="rank-title" title="${r.title}">${r.title}</span>`;
-
-    return `
-      <div class="rank-item">
-        <div class="rank-head">
-          <span class="rank-num ${medal(i)}">${String(i + 1).padStart(2, '0')}</span>
-          ${titleHTML}
-        </div>
-        <div class="rank-meta">
-          <span class="rank-val ${valClass}">${value.toLocaleString()}</span>
-          <div class="rank-bar">
-            <div class="rank-bar-fill ${barClass}" style="width:${scaled.toFixed(1)}%"></div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function buildGrowthRanking(containerId, rows) {
-  if (!rows.length) return;
-
-  // 日付一覧を新しい順に並べる
-  const dates = [...new Set(rows.map(r => r.date))].sort();
-  if (dates.length < 2) {
-    document.getElementById(containerId).innerHTML =
-      '<div class="card pad" style="color:var(--text2);">まだ比較用データが足りません</div>';
-    return;
-  }
-
-  const latestDate = dates[dates.length - 1];
-  const baseIndex = Math.max(0, dates.length - 8); // 7日前相当
-  const baseDate = dates[baseIndex];
-
-  const latestRows = rows.filter(r => r.date === latestDate);
-  const baseRows = rows.filter(r => r.date === baseDate);
-
-  // keyごとに7日前データを引けるようにする
-  const baseMap = {};
-  baseRows.forEach(r => {
-    baseMap[r.key] = r;
-  });
-
-  const growthList = latestRows
-    .filter(r => !EXCLUDED_TITLES.includes(r.title))
-    .map(r => {
-      const currentPV = Number(r.read_count) || 0;
-      const prevPV = baseMap[r.key] ? (Number(baseMap[r.key].read_count) || 0) : 0;
-      const growth = currentPV - prevPV;
-
-      return {
-        ...r,
-        growth
-      };
-    })
-    .filter(r => r.growth > 0)
-    .sort((a, b) => b.growth - a.growth)
-    .slice(0, 10);
-
-  if (!growthList.length) {
-    document.getElementById(containerId).innerHTML =
-      '<div class="card pad" style="color:var(--text2);">直近7日で伸びた記事はまだありません</div>';
-    return;
-  }
-
-  const max = Math.max(...growthList.map(r => r.growth), 1);
-  const medal = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-
-  document.getElementById(containerId).innerHTML = growthList.map((r, i) => {
-    const scaled = max > 1
-      ? (Math.log10(r.growth + 1) / Math.log10(max + 1)) * 67 + 18
-      : 18;
-
-    const url = buildNoteUrl(r);
-    const titleHTML = url
-      ? `<a class="rank-title rank-link" href="${url}" target="_blank" rel="noopener noreferrer" title="${r.title}">${r.title}</a>`
-      : `<span class="rank-title" title="${r.title}">${r.title}</span>`;
-
-    return `
-      <div class="rank-item">
-        <div class="rank-head">
-          <span class="rank-num ${medal(i)}">${String(i + 1).padStart(2, '0')}</span>
-          ${titleHTML}
-        </div>
-        <div class="rank-meta">
-          <span class="rank-val growth-val">+${r.growth.toLocaleString()}</span>
-          <div class="rank-bar">
-            <div class="rank-bar-fill growth-bar" style="width:${scaled.toFixed(1)}%"></div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}  
-  
 function buildFollowers(summary, followers) {
   const fRows = followers.filter(r => r['フォロワー数']);
   let labels = [];
   let data = [];
 
   if (fRows.length > 1) {
-    labels = fRows.map(r => r['日付'] ? r['日付'].slice(5) : '');
+    labels = fRows.map(r => (r['日付'] || '').slice(5));
     data = fRows.map(r => Number(r['フォロワー数']) || 0);
   } else {
     const s = summary.filter(r => r['フォロワー数']);
-    labels = s.map(r => r['日付'] ? r['日付'].slice(5) : '');
+    labels = s.map(r => (r['日付'] || '').slice(5));
     data = s.map(r => Number(r['フォロワー数']) || 0);
   }
 
@@ -885,6 +888,123 @@ function buildQuad(rows) {
   });
 }
 
+function buildNoteUrl(row) {
+  if (!CONFIG.noteUsername || !row.key) return null;
+  return `https://note.com/${CONFIG.noteUsername}/n/${row.key}`;
+}
+
+function buildRanking(containerId, rows, valueKey, barClass, valClass) {
+  if (!rows.length) return;
+
+  const latest = rows.reduce((a, b) => a.date > b.date ? a : b).date;
+  const sorted = rows
+    .filter(r => r.date === latest && !EXCLUDED_TITLES.includes(r.title))
+    .sort((a, b) => Number(b[valueKey]) - Number(a[valueKey]))
+    .slice(0, 20);
+
+  if (!sorted.length) {
+    document.getElementById(containerId).innerHTML = `<div class="card"><div class="empty-note">データなし</div></div>`;
+    return;
+  }
+
+  const max = Math.max(...sorted.map(r => Number(r[valueKey]) || 0), 1);
+  const medal = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+
+  document.getElementById(containerId).innerHTML = sorted.map((r, i) => {
+    const value = Number(r[valueKey]) || 0;
+    const scaled = max > 1
+      ? (Math.log10(value + 1) / Math.log10(max + 1)) * 67 + 18
+      : 18;
+
+    const url = buildNoteUrl(r);
+    const titleHTML = url
+      ? `<a class="rank-title rank-link" href="${url}" target="_blank" rel="noopener noreferrer" title="${escapeHTML(r.title)}">${escapeHTML(r.title)}</a>`
+      : `<span class="rank-title" title="${escapeHTML(r.title)}">${escapeHTML(r.title)}</span>`;
+
+    return `
+      <div class="rank-item">
+        <div class="rank-head">
+          <span class="rank-num ${medal(i)}">${String(i + 1).padStart(2, '0')}</span>
+          ${titleHTML}
+        </div>
+        <div class="rank-meta">
+          <span class="rank-val ${valClass}">${value.toLocaleString()}</span>
+          <div class="rank-bar">
+            <div class="rank-bar-fill ${barClass}" style="width:${scaled.toFixed(1)}%"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function buildGrowthRanking(containerId, rows) {
+  if (!rows.length) return;
+
+  const dates = [...new Set(rows.map(r => r.date))].sort();
+  if (dates.length < 2) {
+    document.getElementById(containerId).innerHTML =
+      '<div class="card"><div class="empty-note">まだ比較用データが足りません</div></div>';
+    return;
+  }
+
+  const latestDate = dates[dates.length - 1];
+  const baseIndex = Math.max(0, dates.length - 8);
+  const baseDate = dates[baseIndex];
+
+  const latestRows = rows.filter(r => r.date === latestDate);
+  const baseRows = rows.filter(r => r.date === baseDate);
+
+  const baseMap = {};
+  baseRows.forEach(r => { baseMap[r.key] = r; });
+
+  const growthList = latestRows
+    .filter(r => !EXCLUDED_TITLES.includes(r.title))
+    .map(r => {
+      const currentPV = Number(r.read_count) || 0;
+      const prevPV = baseMap[r.key] ? (Number(baseMap[r.key].read_count) || 0) : 0;
+      return { ...r, growth: currentPV - prevPV };
+    })
+    .filter(r => r.growth > 0)
+    .sort((a, b) => b.growth - a.growth)
+    .slice(0, 10);
+
+  if (!growthList.length) {
+    document.getElementById(containerId).innerHTML =
+      '<div class="card"><div class="empty-note">直近7日で伸びた記事はまだありません</div></div>';
+    return;
+  }
+
+  const max = Math.max(...growthList.map(r => r.growth), 1);
+  const medal = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+
+  document.getElementById(containerId).innerHTML = growthList.map((r, i) => {
+    const scaled = max > 1
+      ? (Math.log10(r.growth + 1) / Math.log10(max + 1)) * 67 + 18
+      : 18;
+
+    const url = buildNoteUrl(r);
+    const titleHTML = url
+      ? `<a class="rank-title rank-link" href="${url}" target="_blank" rel="noopener noreferrer" title="${escapeHTML(r.title)}">${escapeHTML(r.title)}</a>`
+      : `<span class="rank-title" title="${escapeHTML(r.title)}">${escapeHTML(r.title)}</span>`;
+
+    return `
+      <div class="rank-item">
+        <div class="rank-head">
+          <span class="rank-num ${medal(i)}">${String(i + 1).padStart(2, '0')}</span>
+          ${titleHTML}
+        </div>
+        <div class="rank-meta">
+          <span class="rank-val growth-val">+${r.growth.toLocaleString()}</span>
+          <div class="rank-bar">
+            <div class="rank-bar-fill growth-bar" style="width:${scaled.toFixed(1)}%"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 function buildAssetTable(rows) {
   const tbody = document.getElementById('asset-body');
   if (!rows.length) {
@@ -901,13 +1021,13 @@ function buildAssetTable(rows) {
     return `
       <tr>
         <td class="num-muted">${i + 1}</td>
-        <td>${r.title}</td>
+        <td>${escapeHTML(r.title || r['title'] || '')}</td>
         <td>
           <span class="inline-bar"><span class="inline-bar-fill" style="width:${barW}%"></span></span>
           <span class="num-accent">${gain.toLocaleString()}</span>
         </td>
-        <td class="num-right">${r['稼働日数']}</td>
-        <td class="num-muted">${trend}</td>
+        <td class="num-right">${escapeHTML(r['稼働日数'] || '')}</td>
+        <td class="num-muted">${escapeHTML(trend)}</td>
       </tr>
     `;
   }).join('');
@@ -915,7 +1035,10 @@ function buildAssetTable(rows) {
 
 function buildTrendDetailed(rows) {
   const tbody = document.getElementById('trend-body');
-  if (!rows.length) return;
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="11" class="num-muted">No trend data</td></tr>';
+    return;
+  }
 
   tbody.innerHTML = rows.slice(0, 20).map(r => {
     const state = r['状態'] || '';
@@ -930,18 +1053,42 @@ function buildTrendDetailed(rows) {
 
     return `
       <tr>
-        <td><span class="status-badge ${badgeClass}">${state}</span></td>
-        <td>${r['title']}</td>
-        <td class="num-right">${Number(r['累計PV']).toLocaleString()}</td>
-        <td class="num-accent">${r['トレンドスコア']}</td>
+        <td><span class="status-badge ${badgeClass}">${escapeHTML(state)}</span></td>
+        <td>${escapeHTML(r['title'] || '')}</td>
+        <td class="num-right">${(Number(r['累計PV']) || 0).toLocaleString()}</td>
+        <td class="num-accent">${escapeHTML(r['トレンドスコア'] || '')}</td>
         ${dailyCells}
       </tr>
     `;
   }).join('');
 }
 
+function buildGenericTable(headId, bodyId, rows, limit = 20) {
+  const thead = document.getElementById(headId);
+  const tbody = document.getElementById(bodyId);
+
+  if (!rows || !rows.length) {
+    thead.innerHTML = '';
+    tbody.innerHTML = '<tr><td class="num-muted">データなし</td></tr>';
+    return;
+  }
+
+  const headers = Object.keys(rows[0]);
+  thead.innerHTML = `<tr>${headers.map(h => `<th>${escapeHTML(h)}</th>`).join('')}</tr>`;
+
+  tbody.innerHTML = rows.slice(0, limit).map(r => `
+    <tr>
+      ${headers.map(h => {
+        const val = r[h] ?? '';
+        const isNum = /^-?\d+(\.\d+)?$/.test(String(val));
+        return `<td class="${isNum ? 'num-right' : ''}">${escapeHTML(val)}</td>`;
+      }).join('')}
+    </tr>
+  `).join('');
+}
+
 function validateConfig() {
-  if (CONFIG.repo === 'YOUR_GITHUB_USERNAME/YOUR_REPO_NAME' || !CONFIG.repo.includes('/')) {
+  if (!CONFIG.repo.includes('/')) {
     document.getElementById('last-updated').textContent = '⚠️ CONFIG未設定';
     return false;
   }
@@ -952,10 +1099,23 @@ async function init() {
   if (!validateConfig()) return;
 
   try {
-    const summary = await fetchCSV('daily_summary');
-    const articles = await fetchCSV('articles');
-    const trend = await fetchCSV('trend_analysis');
-    const assets = await fetchCSV('asset_articles');
+    const [
+      summary,
+      articles,
+      trend,
+      assets,
+      weekly,
+      monthly,
+      period
+    ] = await Promise.all([
+      fetchCSV('daily_summary'),
+      fetchCSV('articles'),
+      fetchCSV('trend_analysis'),
+      fetchCSV('asset_articles'),
+      fetchCSV('weekly_summary'),
+      fetchCSV('monthly_summary'),
+      fetchCSV('period_ranking')
+    ]);
 
     let followers = [];
     try {
@@ -965,23 +1125,27 @@ async function init() {
     }
 
     const latest = summary[summary.length - 1];
-    document.getElementById('kpi-views').textContent = Number(latest['ビュー合計']).toLocaleString();
-    document.getElementById('kpi-likes').textContent = Number(latest['スキ合計']).toLocaleString();
-    document.getElementById('kpi-articles').textContent = Number(latest['記事数']).toLocaleString();
+    document.getElementById('kpi-views').textContent = (Number(latest['ビュー合計']) || 0).toLocaleString();
+    document.getElementById('kpi-likes').textContent = (Number(latest['スキ合計']) || 0).toLocaleString();
+    document.getElementById('kpi-articles').textContent = (Number(latest['記事数']) || 0).toLocaleString();
     document.getElementById('kpi-followers').textContent = latest['フォロワー数'] || '—';
-    document.getElementById('last-updated').textContent = `updated ${latest['日付']} ${latest['更新時刻'] || ''}`;
+    document.getElementById('last-updated').textContent = `updated ${latest['日付'] || ''} ${latest['更新時刻'] || ''}`;
 
     setDiff('kpi-views-diff', parseFloat(latest['ビュー前日比(%)']));
     setDiff('kpi-likes-diff', parseFloat(latest['スキ前日比(%)']));
 
     buildDaily(summary);
-buildRanking('ranking-views', articles, 'read_count', 'view-bar', 'view-val');
-buildRanking('ranking-likes', articles, 'like_count', 'like-bar', 'like-val');
-buildGrowthRanking('ranking-growth', articles);
-buildFollowers(summary, followers);
-buildQuad(summary);
-buildAssetTable(assets);
-buildTrendDetailed(trend);
+    buildRanking('ranking-views', articles, 'read_count', 'view-bar', 'view-val');
+    buildRanking('ranking-likes', articles, 'like_count', 'like-bar', 'like-val');
+    buildGrowthRanking('ranking-growth', articles);
+    buildFollowers(summary, followers);
+    buildQuad(summary);
+    buildAssetTable(assets);
+    buildTrendDetailed(trend);
+
+    buildGenericTable('weekly-head', 'weekly-body', weekly, 12);
+    buildGenericTable('monthly-head', 'monthly-body', monthly, 12);
+    buildGenericTable('period-head', 'period-body', period, 50);
 
   } catch (e) {
     console.error(e);
@@ -993,4 +1157,3 @@ init();
 </script>
 </body>
 </html>
-
