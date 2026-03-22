@@ -143,7 +143,7 @@ body::before {
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
 }
 .kpi-card {
@@ -617,6 +617,15 @@ body::before {
     </div>
 
     <div class="card pad kpi-card">
+  <div class="kpi-top">
+    <span class="kpi-dot accent-rose"></span>
+    <div class="kpi-label">COMMENT DENSITY</div>
+  </div>
+  <div class="kpi-value" id="comment-like-rate">—</div>
+  <div class="kpi-sub">コメント ÷ スキ × 100</div>
+</div>
+
+    <div class="card pad kpi-card">
       <div class="kpi-top">
         <span class="kpi-dot accent-violet"></span>
         <div class="kpi-label">Most Commented</div>
@@ -756,18 +765,21 @@ function buildLatestArticleRows(rows) {
 
   return Object.values(byKey).map(r => {
     const pv = Number(r.read_count) || 0;
+    const likes = Number(r.like_count) || 0;
     const comments = Number(r.comment_count) || 0;
+
     return {
       key: r.key || '',
       title: r.title || '',
       read_count: pv,
-      like_count: Number(r.like_count) || 0,
+      like_count: likes,
       comment_count: comments,
-      comment_rate: pv >= 50 ? (comments / pv) * 100 : null
-      comment_like_rate: like >= 10 ? (comments / like) * 100 : null
+      comment_rate: pv >= 50 ? (comments / pv) * 100 : null,
+      comment_like_rate: likes >= 10 ? (comments / likes) * 100 : null
     };
   });
 }
+
 
 function renderCommentKPIs(rows) {
   if (!rows.length) return;
@@ -780,10 +792,55 @@ function renderCommentKPIs(rows) {
     ? rateRows.reduce((sum, r) => sum + r.comment_rate, 0) / rateRows.length
     : 0;
 
+  const likeRateRows = rows.filter(r => r.comment_like_rate !== null);
+  const avgLikeRate = likeRateRows.length
+    ? likeRateRows.reduce((sum, r) => sum + r.comment_like_rate, 0) / likeRateRows.length
+    : 0;
+
   const maxRow = rows.reduce((a, b) =>
     (Number(a.comment_count) || 0) >= (Number(b.comment_count) || 0) ? a : b
   , rows[0]);
 
+  const topCommentsEl = document.getElementById('kpi-comments');
+  if (topCommentsEl) {
+    topCommentsEl.textContent = total.toLocaleString();
+  }
+
+  const commentTotalEl = document.getElementById('comment-total');
+  if (commentTotalEl) {
+    commentTotalEl.textContent = total.toLocaleString();
+  }
+
+  const commentTotalSubEl = document.getElementById('comment-total-sub');
+  if (commentTotalSubEl) {
+    commentTotalSubEl.textContent = `${rows.length}記事中 ${engaged}記事にコメントあり`;
+  }
+
+  const commentEngagedEl = document.getElementById('comment-engaged');
+  if (commentEngagedEl) {
+    commentEngagedEl.textContent = engaged.toLocaleString();
+  }
+
+  const commentRateEl = document.getElementById('comment-rate');
+  if (commentRateEl) {
+    commentRateEl.textContent = avgRate.toFixed(3) + '%';
+  }
+
+  const commentLikeRateEl = document.getElementById('comment-like-rate');
+  if (commentLikeRateEl) {
+    commentLikeRateEl.textContent = avgLikeRate.toFixed(3) + '%';
+  }
+
+  const commentMaxEl = document.getElementById('comment-max');
+  if (commentMaxEl) {
+    commentMaxEl.textContent = (Number(maxRow?.comment_count) || 0).toLocaleString();
+  }
+
+  const commentMaxTitleEl = document.getElementById('comment-max-title');
+  if (commentMaxTitleEl) {
+    commentMaxTitleEl.textContent = maxRow?.title || '—';
+  }
+}
   // 上段KPI
   const topCommentsEl = document.getElementById('kpi-comments');
   if (topCommentsEl) {
