@@ -623,7 +623,7 @@ body::before {
     <div class="kpi-label">COMMENT DENSITY</div>
   </div>
   <div class="kpi-value" id="comment-like-rate">—</div>
-  <div class="kpi-sub">コメント ÷ スキ × 100</div>
+ <div class="kpi-sub">コメント ÷ スキ × 100（PV300・スキ30以上）</div>
 </div>
 
     <div class="card pad kpi-card">
@@ -769,15 +769,17 @@ function buildLatestArticleRows(rows) {
     const likes = Number(r.like_count) || 0;
     const comments = Number(r.comment_count) || 0;
 
-    return {
-      key: r.key || '',
-      title: r.title || '',
-      read_count: pv,
-      like_count: likes,
-      comment_count: comments,
-      comment_rate: pv >= 50 ? (comments / pv) * 100 : null,
-      comment_like_rate: likes >= 10 ? (comments / likes) * 100 : null
-    };
+return {
+  key: r.key || '',
+  title: r.title || '',
+  read_count: pv,
+  like_count: likes,
+  comment_count: comments,
+  comment_rate: pv >= 50 ? (comments / pv) * 100 : null,
+  comment_like_rate: (likes >= 30 && pv >= 300)
+    ? (comments / likes) * 100
+    : null
+};
   });
 }
 
