@@ -1513,48 +1513,76 @@ function buildLatestArticleRows(rows) {
 }
 
 function renderCommentKPIs(rows) {
-  if (!rows.length) return;
+  if (!rows || !rows.length) return;
 
-  const total = rows.reduce((sum, r) => sum + parseNumber(r.comment_count), 0);
-  const engaged = rows.filter(r => parseNumber(r.comment_count) >= 1).length;
+  // ===== 基本値 =====
+  const totalComments = rows.reduce((sum, r) => sum + parseNumber(r.comment_count), 0);
+  const engagedArticles = rows.filter(r => parseNumber(r.comment_count) >= 1).length;
 
-  const likeRateRows = rows.filter(r => r.like_rate !== null);
-  const avgLikeRate = likeRateRows.length
-    ? likeRateRows.reduce((sum, r) => sum + r.like_rate, 0) / likeRateRows.length
+  // ===== Avg Like Rate（ここが修正の本丸）=====
+  const likeRateRows = rows.filter(r =>
+    r.like_rate !== null &&
+    r.like_rate !== undefined &&
+    !Number.isNaN(r.like_rate)
+  );
+
+  const avgLikeRate = likeRateRows.length > 0
+    ? likeRateRows.reduce((sum, r) => sum + Number(r.like_rate || 0), 0) / likeRateRows.length
     : 0;
 
-  const commentLikeRateRows = rows.filter(r => r.comment_like_rate !== null);
-  const avgCommentLikeRate = commentLikeRateRows.length
-    ? commentLikeRateRows.reduce((sum, r) => sum + r.comment_like_rate, 0) / commentLikeRateRows.length
+  // ===== コメント濃度 =====
+  const commentDensityRows = rows.filter(r =>
+    r.comment_like_rate !== null &&
+    r.comment_like_rate !== undefined &&
+    !Number.isNaN(r.comment_like_rate)
+  );
+
+  const avgCommentDensity = commentDensityRows.length > 0
+    ? commentDensityRows.reduce((sum, r) => sum + Number(r.comment_like_rate || 0), 0) / commentDensityRows.length
     : 0;
 
+  // ===== 最大コメント記事 =====
   const maxRow = rows.reduce((a, b) =>
     parseNumber(a.comment_count) >= parseNumber(b.comment_count) ? a : b
-  , rows[0]);
+  , rows[0] || {});
 
-  const topCommentsEl = document.getElementById('kpi-comments');
-  if (topCommentsEl) topCommentsEl.textContent = total.toLocaleString();
+  // ===== DOM反映 =====
 
-  const commentTotalEl = document.getElementById('comment-total');
-  if (commentTotalEl) commentTotalEl.textContent = total.toLocaleString();
+  // 総コメント
+  const totalEl = document.getElementById('comment-total');
+  if (totalEl) totalEl.textContent = totalComments.toLocaleString();
 
-  const commentTotalSubEl = document.getElementById('comment-total-sub');
-  if (commentTotalSubEl) commentTotalSubEl.textContent = `${rows.length}記事中 ${engaged}記事にコメントあり`;
+  const totalSubEl = document.getElementById('comment-total-sub');
+  if (totalSubEl) {
+    totalSubEl.textContent = `${rows.length}記事中 ${engagedArticles}記事にコメントあり`;
+  }
 
-  const commentEngagedEl = document.getElementById('comment-engaged');
-  if (commentEngagedEl) commentEngagedEl.textContent = engaged.toLocaleString();
+  // コメント記事数
+  const engagedEl = document.getElementById('comment-engaged');
+  if (engagedEl) engagedEl.textContent = engagedArticles.toLocaleString();
 
+  // ⭐ Avg Like Rate（ここが直る）
   const likeRateEl = document.getElementById('like-rate');
-  if (likeRateEl) likeRateEl.textContent = avgLikeRate.toFixed(3) + '%';
+  if (likeRateEl) {
+    likeRateEl.textContent = avgLikeRate.toFixed(3) + '%';
+  }
 
-  const commentLikeRateEl = document.getElementById('comment-like-rate');
-  if (commentLikeRateEl) commentLikeRateEl.textContent = avgCommentLikeRate.toFixed(3) + '%';
+  // コメント濃度
+  const densityEl = document.getElementById('comment-like-rate');
+  if (densityEl) {
+    densityEl.textContent = avgCommentDensity.toFixed(3) + '%';
+  }
 
-  const commentMaxEl = document.getElementById('comment-max');
-  if (commentMaxEl) commentMaxEl.textContent = parseNumber(maxRow?.comment_count).toLocaleString();
+  // 最大コメント
+  const maxEl = document.getElementById('comment-max');
+  if (maxEl) {
+    maxEl.textContent = parseNumber(maxRow.comment_count).toLocaleString();
+  }
 
-  const commentMaxTitleEl = document.getElementById('comment-max-title');
-  if (commentMaxTitleEl) commentMaxTitleEl.textContent = maxRow?.title || '—';
+  const maxTitleEl = document.getElementById('comment-max-title');
+  if (maxTitleEl) {
+    maxTitleEl.textContent = maxRow.title || '—';
+  }
 }
 
   function buildCommentDensityTrend(rows) {
