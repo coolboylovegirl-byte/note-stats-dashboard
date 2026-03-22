@@ -3,15 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>note / stats - ねんころ dashboard</title>
+<title>note / stats dashboard</title>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+
 <style>
 :root {
   --bg: #f7f4fb;
   --bg2: #f2eef9;
-  --card: rgba(255,255,255,0.78);
-  --card-strong: rgba(255,255,255,0.92);
+  --card: rgba(255,255,255,0.82);
+  --card-strong: rgba(255,255,255,0.94);
   --border: rgba(126, 103, 164, 0.14);
   --border-strong: rgba(126, 103, 164, 0.24);
   --text: #4f4667;
@@ -27,6 +29,7 @@
   --rose: #e7a9bc;
   --gold: #e4c58b;
   --danger: #d98aa3;
+  --navy: #5d5475;
 
   --radius: 20px;
   --radius-sm: 14px;
@@ -37,6 +40,7 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { min-height: 100%; }
+
 body {
   font-family: var(--sans);
   color: var(--text);
@@ -45,6 +49,7 @@ body {
     radial-gradient(circle at top right, rgba(154, 208, 231, 0.35), transparent 28%),
     linear-gradient(180deg, #fbf9fe 0%, #f5f1fb 50%, #f8f4fb 100%);
 }
+
 body::before {
   content: "";
   position: fixed;
@@ -68,8 +73,9 @@ body::before {
   background: rgba(249, 245, 252, 0.78);
   border-bottom: 1px solid var(--border);
 }
+
 .header-inner {
-  max-width: 960px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: 14px 16px;
   display: flex;
@@ -77,12 +83,14 @@ body::before {
   justify-content: space-between;
   gap: 12px;
 }
+
 .brand {
   display: flex;
   align-items: center;
   gap: 10px;
   min-width: 0;
 }
+
 .brand-dot {
   width: 10px;
   height: 10px;
@@ -91,6 +99,7 @@ body::before {
   box-shadow: 0 0 0 6px rgba(168, 138, 217, 0.12);
   flex-shrink: 0;
 }
+
 .brand-text {
   display: flex;
   align-items: baseline;
@@ -100,6 +109,7 @@ body::before {
   font-weight: 700;
   letter-spacing: 0.02em;
 }
+
 .brand-main { font-size: 28px; color: #5d5475; }
 .brand-slash { color: #b5aacd; font-size: 22px; }
 .brand-sub { font-size: 24px; color: var(--violet); }
@@ -108,11 +118,13 @@ body::before {
   text-align: right;
   flex-shrink: 0;
 }
+
 #last-updated {
   font-size: 11px;
   line-height: 1.35;
   color: var(--text2);
 }
+
 .badge-live {
   display: inline-flex;
   margin-top: 4px;
@@ -126,12 +138,13 @@ body::before {
 }
 
 .app {
-  max-width: 960px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: 16px 14px 40px;
 }
 
 .section { margin-bottom: 16px; }
+
 .card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -139,17 +152,63 @@ body::before {
   box-shadow: var(--shadow);
   backdrop-filter: blur(16px);
 }
+
 .card.pad { padding: 16px; }
+
+.tab-nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  border: 1px solid var(--border-strong);
+  background: rgba(255,255,255,0.72);
+  color: var(--text2);
+  padding: 9px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  transition: 0.18s ease;
+}
+
+.tab-btn:hover {
+  transform: translateY(-1px);
+  color: var(--violet);
+}
+
+.tab-btn.active {
+  color: var(--violet);
+  border-color: rgba(169,138,217,0.35);
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 6px 18px rgba(169,138,217,0.12);
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
 
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
 }
+
+.kpi-grid.four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .kpi-card {
   position: relative;
   overflow: hidden;
 }
+
 .kpi-card::before {
   content: "";
   position: absolute;
@@ -157,52 +216,65 @@ body::before {
   background: linear-gradient(135deg, rgba(255,255,255,0.35), transparent 55%);
   pointer-events: none;
 }
+
 .kpi-top {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
 }
+
 .kpi-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
+
 .kpi-label {
   font-size: 13px;
   color: var(--text2);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+
 .kpi-value {
   font-family: var(--round);
   font-weight: 700;
-  font-size: clamp(30px, 4vw, 46px);
+  font-size: clamp(28px, 3.2vw, 44px);
   line-height: 1;
   letter-spacing: -0.03em;
   margin-bottom: 8px;
+  color: var(--navy);
 }
+
 .kpi-sub {
   font-size: 12px;
   color: var(--text2);
+  line-height: 1.5;
 }
+
 .kpi-diff {
   font-size: 13px;
   margin-top: 6px;
   font-weight: 700;
 }
+
 .kpi-diff.up { color: var(--mint); }
 .kpi-diff.down { color: var(--danger); }
 
 .kpi-views .kpi-dot, .accent-cyan { background: var(--cyan); }
 .kpi-views .kpi-value { color: #65bfdc; }
+
 .kpi-likes .kpi-dot, .accent-pink { background: var(--pink); }
 .kpi-likes .kpi-value { color: #d68ebc; }
+
 .kpi-articles .kpi-dot, .accent-gold { background: var(--gold); }
 .kpi-articles .kpi-value { color: #d9b56f; }
+
 .kpi-followers .kpi-dot, .accent-violet { background: var(--violet); }
 .kpi-followers .kpi-value { color: #9b80db; }
+
 .accent-rose { background: var(--rose); }
 
 .section-title {
@@ -212,18 +284,22 @@ body::before {
   margin-bottom: 12px;
   padding: 0 4px;
 }
+
 .section-title .dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: var(--lavender);
+  flex-shrink: 0;
 }
+
 .section-title h2 {
   font-size: 16px;
   color: var(--text);
   font-weight: 700;
   letter-spacing: 0.03em;
 }
+
 .section-title .small-badge {
   margin-left: auto;
   font-size: 10px;
@@ -249,18 +325,21 @@ body::before {
   flex-direction: column;
   gap: 10px;
 }
+
 .rank-item {
   padding: 12px;
   border-radius: 18px;
   background: rgba(255,255,255,0.65);
   border: 1px solid rgba(168, 138, 217, 0.10);
 }
+
 .rank-head {
   display: grid;
   grid-template-columns: 28px 1fr;
   gap: 10px;
   align-items: start;
 }
+
 .rank-num {
   font-family: var(--round);
   font-size: 14px;
@@ -268,9 +347,11 @@ body::before {
   color: var(--text3);
   padding-top: 2px;
 }
+
 .rank-num.gold { color: #c8a45f; }
 .rank-num.silver { color: #9aa3b8; }
 .rank-num.bronze { color: #c68f77; }
+
 .rank-title, .rank-link {
   font-size: 14px;
   line-height: 1.55;
@@ -281,7 +362,9 @@ body::before {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
 .rank-link:hover { color: var(--violet); }
+
 .rank-meta {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -290,39 +373,48 @@ body::before {
   margin-top: 8px;
   padding-left: 38px;
 }
+
 .rank-val {
   font-family: var(--round);
   font-size: 13px;
   font-weight: 700;
   min-width: 56px;
 }
+
 .rank-bar {
   height: 4px;
   background: rgba(126, 103, 164, 0.12);
   border-radius: 999px;
   overflow: hidden;
 }
+
 .rank-bar-fill {
   height: 100%;
   border-radius: 999px;
 }
+
 .view-bar { background: linear-gradient(90deg, #8bd8ec, #74c3f0); }
 .like-bar { background: linear-gradient(90deg, #ebb0d2, #d89bcb); }
 .growth-bar { background: linear-gradient(90deg, #9ae0cc, #7ac8cf); }
+
 .view-val { color: #5db9d5; }
 .like-val { color: #cb86b3; }
 .growth-val { color: #5fb9a7; }
 
 .table-card { overflow: hidden; }
+
 .table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+
 .table-inner { min-width: 760px; }
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
 }
+
 .data-table th,
 .data-table td {
   padding: 10px 12px;
@@ -330,6 +422,7 @@ body::before {
   text-align: left;
   vertical-align: top;
 }
+
 .data-table th {
   font-size: 11px;
   color: var(--text2);
@@ -339,13 +432,16 @@ body::before {
   position: sticky;
   top: 0;
 }
+
 .data-table td {
   font-size: 13px;
   color: var(--text);
 }
+
 .num-right { text-align: right; }
 .num-accent { color: #62b6d8; font-weight: 700; }
 .num-muted { color: var(--text3); }
+
 .inline-bar {
   width: 56px;
   height: 4px;
@@ -356,11 +452,13 @@ body::before {
   margin-right: 8px;
   vertical-align: middle;
 }
+
 .inline-bar-fill {
   height: 100%;
   border-radius: 999px;
   background: linear-gradient(90deg, #8fd5db, #8aa0e5);
 }
+
 .status-badge {
   display: inline-block;
   padding: 4px 8px;
@@ -368,6 +466,7 @@ body::before {
   font-size: 10px;
   font-weight: 700;
 }
+
 .badge-hot { color: #d86c90; background: rgba(216, 108, 144, 0.10); }
 .badge-grow { color: #65b9a7; background: rgba(101, 185, 167, 0.12); }
 .badge-idle { color: var(--text3); background: rgba(126, 103, 164, 0.08); }
@@ -380,14 +479,28 @@ body::before {
 
 .footer-space { height: 8px; }
 
+#comment-max-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.5;
+}
+
+@media (max-width: 1100px) {
+  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+  .kpi-grid.four { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 900px) {
-  .kpi-grid { grid-template-columns: 1fr 1fr; }
   .two-col { grid-template-columns: 1fr; }
-  .app, .header-inner { max-width: 680px; }
+  .app, .header-inner { max-width: 760px; }
 }
 
 @media (max-width: 640px) {
-  .kpi-grid { grid-template-columns: 1fr; }
+  .kpi-grid,
+  .kpi-grid.four { grid-template-columns: 1fr; }
+
   .brand-main { font-size: 24px; }
   .brand-sub { font-size: 20px; }
 }
@@ -412,265 +525,341 @@ body::before {
   </header>
 
   <main class="app">
-    <section class="section">
-      <div class="kpi-grid">
-        <div class="card pad kpi-card kpi-views">
-          <div class="kpi-top">
-            <span class="kpi-dot"></span>
-            <div class="kpi-label">Total Views</div>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="overview">Overview</button>
+      <button class="tab-btn" data-tab="weekly">Weekly</button>
+      <button class="tab-btn" data-tab="monthly">Monthly</button>
+    </div>
+
+    <!-- OVERVIEW -->
+    <section id="tab-overview" class="tab-panel active">
+      <section class="section">
+        <div class="kpi-grid">
+          <div class="card pad kpi-card kpi-views">
+            <div class="kpi-top">
+              <span class="kpi-dot"></span>
+              <div class="kpi-label">Total Views</div>
+            </div>
+            <div class="kpi-value" id="kpi-views">—</div>
+            <div class="kpi-diff" id="kpi-views-diff">前日比</div>
           </div>
-          <div class="kpi-value" id="kpi-views">—</div>
-          <div class="kpi-diff" id="kpi-views-diff">前日比</div>
-        </div>
 
-        <div class="card pad kpi-card kpi-likes">
-          <div class="kpi-top">
-            <span class="kpi-dot"></span>
-            <div class="kpi-label">Total Likes</div>
+          <div class="card pad kpi-card kpi-likes">
+            <div class="kpi-top">
+              <span class="kpi-dot"></span>
+              <div class="kpi-label">Total Likes</div>
+            </div>
+            <div class="kpi-value" id="kpi-likes">—</div>
+            <div class="kpi-diff" id="kpi-likes-diff">前日比</div>
           </div>
-          <div class="kpi-value" id="kpi-likes">—</div>
-          <div class="kpi-diff" id="kpi-likes-diff">前日比</div>
-        </div>
 
-        <div class="card pad kpi-card kpi-articles">
-          <div class="kpi-top">
-            <span class="kpi-dot"></span>
-            <div class="kpi-label">Articles</div>
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-rose"></span>
+              <div class="kpi-label">Comments</div>
+            </div>
+            <div class="kpi-value" id="kpi-comments">—</div>
+            <div class="kpi-sub">累計コメント数</div>
           </div>
-          <div class="kpi-value" id="kpi-articles">—</div>
-          <div class="kpi-sub">公開記事数</div>
-        </div>
 
-        <div class="card pad kpi-card kpi-followers">
-          <div class="kpi-top">
-            <span class="kpi-dot"></span>
-            <div class="kpi-label">Followers</div>
+          <div class="card pad kpi-card kpi-articles">
+            <div class="kpi-top">
+              <span class="kpi-dot"></span>
+              <div class="kpi-label">Articles</div>
+            </div>
+            <div class="kpi-value" id="kpi-articles">—</div>
+            <div class="kpi-sub">公開記事数</div>
           </div>
-          <div class="kpi-value" id="kpi-followers">—</div>
-          <div class="kpi-sub">フォロワー数</div>
+
+          <div class="card pad kpi-card kpi-followers">
+            <div class="kpi-top">
+              <span class="kpi-dot"></span>
+              <div class="kpi-label">Followers</div>
+            </div>
+            <div class="kpi-value" id="kpi-followers">—</div>
+            <div class="kpi-sub">フォロワー数</div>
+          </div>
         </div>
-      
-<div class="card pad kpi-card">
-  <div class="kpi-top">
-    <span class="kpi-dot accent-pink"></span>
-    <div class="kpi-label">Comments</div>
-  </div>
-  <div class="kpi-value" id="kpi-comments">—</div>
-  <div class="kpi-sub">累計コメント数</div>
-  </div>
-</div>
-      
-    </section>
+      </section>
 
-    <section class="section">
-      <div class="section-title">
-        <span class="dot accent-pink"></span>
-        <h2>ビュー / スキ 日次推移</h2>
-        <span class="small-badge">60D</span>
-      </div>
-      <div class="card chart-card">
-        <div class="chart-wrap"><canvas id="chart-daily"></canvas></div>
-      </div>
-    </section>
-
-    <section class="section two-col">
-      <div>
-        <div class="section-title">
-          <span class="dot accent-cyan"></span>
-          <h2>VIEW ランキング TOP 20</h2>
-        </div>
-        <div class="ranking-wrap" id="ranking-views"></div>
-      </div>
-
-      <div>
+      <section class="section">
         <div class="section-title">
           <span class="dot accent-pink"></span>
-          <h2>LIKE ランキング TOP 20</h2>
-        </div>
-        <div class="ranking-wrap" id="ranking-likes"></div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-title">
-        <span class="dot accent-rose"></span>
-        <h2>直近7日 急上昇ランキング</h2>
-        <span class="small-badge">+7D PV</span>
-      </div>
-      <div class="ranking-wrap" id="ranking-growth"></div>
-    </section>
-
-    <section class="section two-col">
-      <div>
-        <div class="section-title">
-          <span class="dot accent-violet"></span>
-          <h2>フォロワー 日次推移</h2>
+          <h2>ビュー / スキ 日次推移</h2>
+          <span class="small-badge">60D</span>
         </div>
         <div class="card chart-card">
-          <div class="chart-wrap small"><canvas id="chart-followers"></canvas></div>
+          <div class="chart-wrap"><canvas id="chart-daily"></canvas></div>
         </div>
-      </div>
+      </section>
 
-      <div>
+      <section class="section two-col">
+        <div>
+          <div class="section-title">
+            <span class="dot accent-cyan"></span>
+            <h2>VIEW ランキング TOP 20</h2>
+          </div>
+          <div class="ranking-wrap" id="ranking-views"></div>
+        </div>
+
+        <div>
+          <div class="section-title">
+            <span class="dot accent-pink"></span>
+            <h2>LIKE ランキング TOP 20</h2>
+          </div>
+          <div class="ranking-wrap" id="ranking-likes"></div>
+        </div>
+      </section>
+
+      <section class="section">
         <div class="section-title">
-          <span class="dot accent-violet"></span>
-          <h2>4象限マップ｜PV × スキ率</h2>
+          <span class="dot accent-rose"></span>
+          <h2>直近7日 急上昇ランキング</h2>
+          <span class="small-badge">+7D PV</span>
+        </div>
+        <div class="ranking-wrap" id="ranking-growth"></div>
+      </section>
+
+      <section class="section two-col">
+        <div>
+          <div class="section-title">
+            <span class="dot accent-violet"></span>
+            <h2>フォロワー 日次推移</h2>
+          </div>
+          <div class="card chart-card">
+            <div class="chart-wrap small"><canvas id="chart-followers"></canvas></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">
+            <span class="dot accent-violet"></span>
+            <h2>4象限マップ｜PV × スキ率</h2>
+          </div>
+          <div class="card chart-card">
+            <div class="chart-wrap small"><canvas id="chart-quad"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <span class="dot accent-gold"></span>
+          <h2>資産記事分析</h2>
+        </div>
+        <div class="card table-card">
+          <div class="table-wrap">
+            <div class="table-inner">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>タイトル</th>
+                    <th>期間PV増加</th>
+                    <th>稼働日数</th>
+                    <th>推移</th>
+                  </tr>
+                </thead>
+                <tbody id="asset-body">
+                  <tr><td colspan="5">読み込み中...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <span class="dot accent-pink"></span>
+          <h2>トレンド動態｜7日間詳細</h2>
+        </div>
+        <div class="card table-card">
+          <div class="table-wrap">
+            <div class="table-inner">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>状態</th>
+                    <th>タイトル</th>
+                    <th>累計PV</th>
+                    <th>スコア</th>
+                    <th>-1日</th>
+                    <th>-2日</th>
+                    <th>-3日</th>
+                    <th>-4日</th>
+                    <th>-5日</th>
+                    <th>-6日</th>
+                    <th>-7日</th>
+                  </tr>
+                </thead>
+                <tbody id="trend-body">
+                  <tr><td colspan="11">読み込み中...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <span class="dot accent-pink"></span>
+          <h2>コメント分析</h2>
+          <span class="small-badge">COMMENT</span>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-cyan"></span>
+              <div class="kpi-label">Total Comments</div>
+            </div>
+            <div class="kpi-value" id="comment-total">—</div>
+            <div class="kpi-sub" id="comment-total-sub">集計中...</div>
+          </div>
+
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-pink"></span>
+              <div class="kpi-label">Engaged Articles</div>
+            </div>
+            <div class="kpi-value" id="comment-engaged">—</div>
+            <div class="kpi-sub">コメント1件以上の記事数</div>
+          </div>
+
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-gold"></span>
+              <div class="kpi-label">Avg Comment Rate</div>
+            </div>
+            <div class="kpi-value" id="comment-rate">—</div>
+            <div class="kpi-sub">コメント ÷ PV × 100</div>
+          </div>
+
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-rose"></span>
+              <div class="kpi-label">Comment Density</div>
+            </div>
+            <div class="kpi-value" id="comment-like-rate">—</div>
+            <div class="kpi-sub">コメント ÷ スキ × 100（PV300・スキ30以上）</div>
+          </div>
+
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-violet"></span>
+              <div class="kpi-label">Most Commented</div>
+            </div>
+            <div class="kpi-value" id="comment-max">—</div>
+            <div class="kpi-sub" id="comment-max-title">—</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section two-col">
+        <div>
+          <div class="section-title">
+            <span class="dot accent-pink"></span>
+            <h2>コメント数 ランキング TOP 10</h2>
+          </div>
+          <div class="ranking-wrap" id="ranking-comments"></div>
+        </div>
+
+        <div>
+          <div class="section-title">
+            <span class="dot accent-gold"></span>
+            <h2>コメント率 ランキング TOP 10</h2>
+          </div>
+          <div class="ranking-wrap" id="ranking-comment-rate"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <span class="dot accent-pink"></span>
+          <h2>PV × コメント 分布</h2>
+          <span class="small-badge">SCATTER</span>
         </div>
         <div class="card chart-card">
-          <div class="chart-wrap small"><canvas id="chart-quad"></canvas></div>
+          <div class="chart-wrap"><canvas id="chart-comment-scatter"></canvas></div>
         </div>
-      </div>
+      </section>
     </section>
 
-    <section class="section">
-      <div class="section-title">
-        <span class="dot accent-gold"></span>
-        <h2>資産記事分析</h2>
-      </div>
-      <div class="card table-card">
-        <div class="table-wrap">
-          <div class="table-inner">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>タイトル</th>
-                  <th>期間PV増加</th>
-                  <th>稼働日数</th>
-                  <th>推移</th>
-                </tr>
-              </thead>
-              <tbody id="asset-body">
-                <tr><td colspan="5">読み込み中...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-title">
-        <span class="dot accent-pink"></span>
-        <h2>トレンド動態｜7日間詳細</h2>
-      </div>
-      <div class="card table-card">
-        <div class="table-wrap">
-          <div class="table-inner">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>状態</th>
-                  <th>タイトル</th>
-                  <th>累計PV</th>
-                  <th>スコア</th>
-                  <th>-1日</th>
-                  <th>-2日</th>
-                  <th>-3日</th>
-                  <th>-4日</th>
-                  <th>-5日</th>
-                  <th>-6日</th>
-                  <th>-7日</th>
-                </tr>
-              </thead>
-              <tbody id="trend-body">
-                <tr><td colspan="11">読み込み中...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-  <div class="section-title">
-    <span class="dot accent-pink"></span>
-    <h2>コメント分析</h2>
-    <span class="small-badge">COMMENT</span>
-  </div>
-
-  <div class="kpi-grid" style="margin-bottom:16px;">
-    <div class="card pad kpi-card">
-      <div class="kpi-top">
-        <span class="kpi-dot accent-cyan"></span>
-        <div class="kpi-label">Total Comments</div>
-      </div>
-      <div class="kpi-value" id="comment-total">—</div>
-      <div class="kpi-sub" id="comment-total-sub">集計中...</div>
-    </div>
-
-    <div class="card pad kpi-card">
-      <div class="kpi-top">
-        <span class="kpi-dot accent-pink"></span>
-        <div class="kpi-label">Engaged Articles</div>
-      </div>
-      <div class="kpi-value" id="comment-engaged">—</div>
-      <div class="kpi-sub">コメント1件以上の記事数</div>
-    </div>
-
-    <div class="card pad kpi-card">
-      <div class="kpi-top">
-        <span class="kpi-dot accent-gold"></span>
-        <div class="kpi-label">Avg Comment Rate</div>
-      </div>
-      <div class="kpi-value" id="comment-rate">—</div>
-      <div class="kpi-sub">コメント ÷ PV × 100</div>
-    </div>
-
-    <div class="card pad kpi-card">
-  <div class="kpi-top">
-    <span class="kpi-dot accent-rose"></span>
-    <div class="kpi-label">COMMENT DENSITY</div>
-  </div>
-  <div class="kpi-value" id="comment-like-rate">—</div>
- <div class="kpi-sub">コメント ÷ スキ × 100（PV300・スキ30以上）</div>
-</div>
-
-    <div class="card pad kpi-card">
-      <div class="kpi-top">
-        <span class="kpi-dot accent-violet"></span>
-        <div class="kpi-label">Most Commented</div>
-      </div>
-      <div class="kpi-value" id="comment-max">—</div>
-      <div class="kpi-sub" id="comment-max-title">—</div>
-    </div>
-  </div>
-</section>
-
-<section class="section two-col">
-  <div>
-    <div class="section-title">
-      <span class="dot accent-pink"></span>
-      <h2>コメント数 ランキング TOP 10</h2>
-    </div>
-    <div class="ranking-wrap" id="ranking-comments"></div>
-  </div>
-
-  <div>
-    <div class="section-title">
-      <span class="dot accent-gold"></span>
-      <h2>コメント率 ランキング TOP 10</h2>
-    </div>
-    <div class="ranking-wrap" id="ranking-comment-rate"></div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="section-title">
-    <span class="dot accent-pink"></span>
-    <h2>PV × コメント 分布</h2>
-    <span class="small-badge">SCATTER</span>
-  </div>
-  <div class="card chart-card">
-    <div class="chart-wrap"><canvas id="chart-comment-scatter"></canvas></div>
-  </div>
-</section>
-
-    <section class="section two-col">
-      <div>
+    <!-- WEEKLY -->
+    <section id="tab-weekly" class="tab-panel">
+      <section class="section">
         <div class="section-title">
           <span class="dot accent-cyan"></span>
-          <h2>週次サマリー</h2>
+          <h2>Weekly Summary</h2>
+          <span class="small-badge">WEEK</span>
+        </div>
+        <div class="kpi-grid four">
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-cyan"></span>
+              <div class="kpi-label">Week</div>
+            </div>
+            <div class="kpi-value" id="weekly-kpi-label">—</div>
+            <div class="kpi-sub">最新週</div>
+          </div>
+
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-pink"></span>
+              <div class="kpi-label">Views</div>
+            </div>
+            <div class="kpi-value" id="weekly-kpi-views">—</div>
+            <div class="kpi-sub">週次PV</div>
+          </div>
+
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-gold"></span>
+              <div class="kpi-label">Likes</div>
+            </div>
+            <div class="kpi-value" id="weekly-kpi-likes">—</div>
+            <div class="kpi-sub">週次スキ</div>
+          </div>
+
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-rose"></span>
+              <div class="kpi-label">Comments</div>
+            </div>
+            <div class="kpi-value" id="weekly-kpi-comments">—</div>
+            <div class="kpi-sub">週次コメント</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section two-col">
+        <div>
+          <div class="section-title">
+            <span class="dot accent-cyan"></span>
+            <h2>週次PV / スキ</h2>
+          </div>
+          <div class="card chart-card">
+            <div class="chart-wrap small"><canvas id="chart-weekly"></canvas></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">
+            <span class="dot accent-rose"></span>
+            <h2>週次コメント / フォロワー</h2>
+          </div>
+          <div class="card chart-card">
+            <div class="chart-wrap small"><canvas id="chart-weekly-secondary"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <span class="dot accent-cyan"></span>
+          <h2>週次サマリー表</h2>
         </div>
         <div class="card table-card">
           <div class="table-wrap">
@@ -684,12 +873,82 @@ body::before {
             </div>
           </div>
         </div>
-      </div>
+      </section>
+    </section>
 
-      <div>
+    <!-- MONTHLY -->
+    <section id="tab-monthly" class="tab-panel">
+      <section class="section">
         <div class="section-title">
           <span class="dot accent-pink"></span>
-          <h2>月次サマリー</h2>
+          <h2>Monthly Summary</h2>
+          <span class="small-badge">MONTH</span>
+        </div>
+        <div class="kpi-grid four">
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-violet"></span>
+              <div class="kpi-label">Month</div>
+            </div>
+            <div class="kpi-value" id="monthly-kpi-label">—</div>
+            <div class="kpi-sub">最新月</div>
+          </div>
+
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-cyan"></span>
+              <div class="kpi-label">Views</div>
+            </div>
+            <div class="kpi-value" id="monthly-kpi-views">—</div>
+            <div class="kpi-sub">月次PV</div>
+          </div>
+
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-pink"></span>
+              <div class="kpi-label">Likes</div>
+            </div>
+            <div class="kpi-value" id="monthly-kpi-likes">—</div>
+            <div class="kpi-sub">月次スキ</div>
+          </div>
+
+          <div class="card pad kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-dot accent-rose"></span>
+              <div class="kpi-label">Comments</div>
+            </div>
+            <div class="kpi-value" id="monthly-kpi-comments">—</div>
+            <div class="kpi-sub">月次コメント</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section two-col">
+        <div>
+          <div class="section-title">
+            <span class="dot accent-pink"></span>
+            <h2>月次PV / スキ</h2>
+          </div>
+          <div class="card chart-card">
+            <div class="chart-wrap small"><canvas id="chart-monthly"></canvas></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">
+            <span class="dot accent-rose"></span>
+            <h2>月次コメント / フォロワー</h2>
+          </div>
+          <div class="card chart-card">
+            <div class="chart-wrap small"><canvas id="chart-monthly-secondary"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <span class="dot accent-pink"></span>
+          <h2>月次サマリー表</h2>
         </div>
         <div class="card table-card">
           <div class="table-wrap">
@@ -703,26 +962,7 @@ body::before {
             </div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-title">
-        <span class="dot accent-gold"></span>
-        <h2>期間ランキング</h2>
-      </div>
-      <div class="card table-card">
-        <div class="table-wrap">
-          <div class="table-inner">
-            <table class="data-table">
-              <thead id="period-head"></thead>
-              <tbody id="period-body">
-                <tr><td>読み込み中...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      </section>
     </section>
 
     <div class="footer-space"></div>
@@ -747,232 +987,6 @@ function escapeHTML(str) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
-}
-function buildLatestArticleRows(rows) {
-  const byKey = {};
-
-  for (const r of rows) {
-    if (EXCLUDED_TITLES.includes(r.title)) continue;
-
-    const key = r.key || r.title;
-    const commentCount = Number(r.comment_count);
-
-    if (isNaN(commentCount)) continue;
-
-    if (!byKey[key] || r.date > byKey[key].date) {
-      byKey[key] = r;
-    }
-  }
-
-  return Object.values(byKey).map(r => {
-    const pv = Number(r.read_count) || 0;
-    const likes = Number(r.like_count) || 0;
-    const comments = Number(r.comment_count) || 0;
-
-return {
-  key: r.key || '',
-  title: r.title || '',
-  read_count: pv,
-  like_count: likes,
-  comment_count: comments,
-  comment_rate: pv >= 50 ? (comments / pv) * 100 : null,
-  comment_like_rate: (likes >= 30 && pv >= 300)
-    ? (comments / likes) * 100
-    : null
-};
-  });
-}
-
-
-function renderCommentKPIs(rows) {
-  if (!rows.length) return;
-
-  const total = rows.reduce((sum, r) => sum + (Number(r.comment_count) || 0), 0);
-  const engaged = rows.filter(r => (Number(r.comment_count) || 0) >= 1).length;
-
-  const rateRows = rows.filter(r => r.comment_rate !== null);
-  const avgRate = rateRows.length
-    ? rateRows.reduce((sum, r) => sum + r.comment_rate, 0) / rateRows.length
-    : 0;
-
-  const likeRateRows = rows.filter(r => r.comment_like_rate !== null);
-  const avgLikeRate = likeRateRows.length
-    ? likeRateRows.reduce((sum, r) => sum + r.comment_like_rate, 0) / likeRateRows.length
-    : 0;
-
-  const maxRow = rows.reduce((a, b) =>
-    (Number(a.comment_count) || 0) >= (Number(b.comment_count) || 0) ? a : b
-  , rows[0]);
-
-  const topCommentsEl = document.getElementById('kpi-comments');
-  if (topCommentsEl) {
-    topCommentsEl.textContent = total.toLocaleString();
-  }
-
-  const commentTotalEl = document.getElementById('comment-total');
-  if (commentTotalEl) {
-    commentTotalEl.textContent = total.toLocaleString();
-  }
-
-  const commentTotalSubEl = document.getElementById('comment-total-sub');
-  if (commentTotalSubEl) {
-    commentTotalSubEl.textContent = `${rows.length}記事中 ${engaged}記事にコメントあり`;
-  }
-
-  const commentEngagedEl = document.getElementById('comment-engaged');
-  if (commentEngagedEl) {
-    commentEngagedEl.textContent = engaged.toLocaleString();
-  }
-
-  const commentRateEl = document.getElementById('comment-rate');
-  if (commentRateEl) {
-    commentRateEl.textContent = avgRate.toFixed(3) + '%';
-  }
-
-  const commentLikeRateEl = document.getElementById('comment-like-rate');
-  if (commentLikeRateEl) {
-    commentLikeRateEl.textContent = avgLikeRate.toFixed(3) + '%';
-  }
-
-  const commentMaxEl = document.getElementById('comment-max');
-  if (commentMaxEl) {
-    commentMaxEl.textContent = (Number(maxRow?.comment_count) || 0).toLocaleString();
-  }
-
-  const commentMaxTitleEl = document.getElementById('comment-max-title');
-  if (commentMaxTitleEl) {
-    commentMaxTitleEl.textContent = maxRow?.title || '—';
-  }
-}
-
-function buildSimpleRanking(containerId, rows, valueKey, barClass, valClass, formatter) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-
-  if (!rows.length) {
-    el.innerHTML = '<div class="card"><div class="empty-note">データなし</div></div>';
-    return;
-  }
-
-  const max = Math.max(...rows.map(r => Number(r[valueKey]) || 0), 1);
-  const medal = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-
-  el.innerHTML = rows.map((r, i) => {
-    const value = Number(r[valueKey]) || 0;
-    const scaled = (value / max) * 100;
-    const url = buildNoteUrl(r);
-    const titleHTML = url
-      ? `<a class="rank-title rank-link" href="${url}" target="_blank" rel="noopener noreferrer" title="${escapeHTML(r.title)}">${escapeHTML(r.title)}</a>`
-      : `<span class="rank-title" title="${escapeHTML(r.title)}">${escapeHTML(r.title)}</span>`;
-
-    return `
-      <div class="rank-item">
-        <div class="rank-head">
-          <span class="rank-num ${medal(i)}">${String(i + 1).padStart(2, '0')}</span>
-          ${titleHTML}
-        </div>
-        <div class="rank-meta">
-          <span class="rank-val ${valClass}">${formatter(value)}</span>
-          <div class="rank-bar">
-            <div class="rank-bar-fill ${barClass}" style="width:${scaled.toFixed(1)}%"></div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function buildCommentScatter(rows) {
-  const points = rows.filter(r => r.read_count > 0 && r.comment_count > 0);
-
-  new Chart(document.getElementById('chart-comment-scatter'), {
-    type: 'scatter',
-    data: {
-      datasets: [{
-        label: '記事',
-        data: points.map(r => ({
-          x: r.read_count,
-          y: r.comment_count,
-          title: r.title,
-          rate: r.comment_rate
-        })),
-        backgroundColor: points.map(r => {
-          if (r.comment_rate === null) return 'rgba(120,198,231,0.7)';
-          if (r.comment_rate >= 0.5) return 'rgba(215,155,199,0.8)';
-          if (r.comment_rate >= 0.1) return 'rgba(228,197,139,0.8)';
-          return 'rgba(120,198,231,0.7)';
-        }),
-        pointRadius: 5,
-        pointHoverRadius: 7
-      }]
-    },
-    options: {
-      ...baseOpts(),
-      plugins: {
-        ...baseOpts().plugins,
-        legend: { display: false },
-        tooltip: {
-          ...baseOpts().plugins.tooltip,
-          callbacks: {
-            title: items => items[0]?.raw?.title || '',
-            label: item => {
-              const d = item.raw;
-              const lines = [
-                `PV: ${Number(d.x).toLocaleString()}`,
-                `コメント: ${Number(d.y).toLocaleString()}件`
-              ];
-              if (d.rate !== null && d.rate !== undefined) {
-                lines.push(`コメント率: ${d.rate.toFixed(3)}%`);
-              }
-              return lines;
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: { color: GRID_COLOR },
-          ticks: { color: '#8b83a5' },
-          title: { display: true, text: '累計PV', color: '#8b83a5' }
-        },
-        y: {
-          grid: { color: GRID_COLOR },
-          ticks: { color: '#8b83a5', stepSize: 1 },
-          title: { display: true, text: 'コメント数', color: '#8b83a5' }
-        }
-      }
-    }
-  });
-}
-
-function renderCommentSection(articleRows) {
-  const rows = buildLatestArticleRows(articleRows);
-  if (!rows.length) return;
-
-  renderCommentKPIs(rows);
-
-  buildSimpleRanking(
-    'ranking-comments',
-    [...rows].sort((a, b) => b.comment_count - a.comment_count).slice(0, 10),
-    'comment_count',
-    'like-bar',
-    'like-val',
-    v => `${v.toLocaleString()}件`
-  );
-
-  buildSimpleRanking(
-    'ranking-comment-rate',
-    [...rows]
-      .filter(r => r.comment_rate !== null)
-      .sort((a, b) => b.comment_rate - a.comment_rate)
-      .slice(0, 10),
-    'comment_rate',
-    'growth-bar',
-    'growth-val',
-    v => `${v.toFixed(3)}%`
-  );
-
-  buildCommentScatter(rows);
 }
 
 function parseCSV(text) {
@@ -1028,6 +1042,36 @@ async function fetchCSV(name) {
   return parseCSV(text);
 }
 
+function parseNumber(v) {
+  if (v === null || v === undefined || v === '') return 0;
+  return Number(String(v).replace(/,/g, '')) || 0;
+}
+
+function findColumn(row, candidates) {
+  if (!row) return null;
+  const keys = Object.keys(row);
+
+  for (const candidate of candidates) {
+    if (keys.includes(candidate)) return candidate;
+  }
+
+  const normalizedMap = new Map(
+    keys.map(k => [k.replace(/\s+/g, '').toLowerCase(), k])
+  );
+
+  for (const candidate of candidates) {
+    const hit = normalizedMap.get(candidate.replace(/\s+/g, '').toLowerCase());
+    if (hit) return hit;
+  }
+
+  return null;
+}
+
+function getField(row, candidates, fallback = '') {
+  const key = findColumn(row, candidates);
+  return key ? row[key] : fallback;
+}
+
 const GRID_COLOR = 'rgba(118,109,144,0.10)';
 Chart.defaults.color = '#8c85a6';
 Chart.defaults.font.family = "'Zen Kaku Gothic New', sans-serif";
@@ -1071,10 +1115,14 @@ const baseOpts = () => ({
 
 function setDiff(id, val) {
   const el = document.getElementById(id);
+  if (!el) return;
+
   if (isNaN(val)) {
     el.textContent = '前日比 —';
+    el.className = 'kpi-diff';
     return;
   }
+
   const sign = val >= 0 ? '▲' : '▼';
   el.textContent = `${sign} ${Math.abs(val).toFixed(1)}% 前日比`;
   el.className = 'kpi-diff ' + (val >= 0 ? 'up' : 'down');
@@ -1082,9 +1130,9 @@ function setDiff(id, val) {
 
 function buildDaily(rows) {
   const r = rows.slice(-60);
-  const labels = r.map(d => (d['日付'] || '').slice(5));
-  const views = r.map(d => Number(d['ビュー合計']) || 0);
-  const likes = r.map(d => Number(d['スキ合計']) || 0);
+  const labels = r.map(d => (getField(d, ['日付']) || '').slice(5));
+  const views = r.map(d => parseNumber(getField(d, ['ビュー合計'])));
+  const likes = r.map(d => parseNumber(getField(d, ['スキ合計'])));
 
   new Chart(document.getElementById('chart-daily'), {
     type: 'bar',
@@ -1139,17 +1187,20 @@ function buildDaily(rows) {
 }
 
 function buildFollowers(summary, followers) {
-  const fRows = followers.filter(r => r['フォロワー数']);
+  const followerCol = followers.length ? findColumn(followers[0], ['フォロワー数', 'followers']) : null;
+  const summaryFollowerCol = summary.length ? findColumn(summary[0], ['フォロワー数', 'followers']) : null;
+
+  const fRows = followerCol ? followers.filter(r => r[followerCol] !== '') : [];
   let labels = [];
   let data = [];
 
   if (fRows.length > 1) {
-    labels = fRows.map(r => (r['日付'] || '').slice(5));
-    data = fRows.map(r => Number(r['フォロワー数']) || 0);
+    labels = fRows.map(r => (getField(r, ['日付']) || '').slice(5));
+    data = fRows.map(r => parseNumber(r[followerCol]));
   } else {
-    const s = summary.filter(r => r['フォロワー数']);
-    labels = s.map(r => (r['日付'] || '').slice(5));
-    data = s.map(r => Number(r['フォロワー数']) || 0);
+    const s = summaryFollowerCol ? summary.filter(r => r[summaryFollowerCol] !== '') : [];
+    labels = s.map(r => (getField(r, ['日付']) || '').slice(5));
+    data = s.map(r => parseNumber(r[summaryFollowerCol]));
   }
 
   new Chart(document.getElementById('chart-followers'), {
@@ -1174,9 +1225,9 @@ function buildFollowers(summary, followers) {
 
 function buildQuad(rows) {
   const data = rows.map(r => ({
-    x: parseFloat(r['ビュー/記事']) || 0,
-    y: parseFloat(r['スキ率(%)']) || 0,
-    label: r['日付']
+    x: parseFloat(getField(r, ['ビュー/記事'])) || 0,
+    y: parseFloat(getField(r, ['スキ率(%)'])) || 0,
+    label: getField(r, ['日付'])
   }));
 
   new Chart(document.getElementById('chart-quad'), {
@@ -1219,7 +1270,7 @@ function buildRanking(containerId, rows, valueKey, barClass, valClass) {
   const latest = rows.reduce((a, b) => a.date > b.date ? a : b).date;
   const sorted = rows
     .filter(r => r.date === latest && !EXCLUDED_TITLES.includes(r.title))
-    .sort((a, b) => Number(b[valueKey]) - Number(a[valueKey]))
+    .sort((a, b) => parseNumber(b[valueKey]) - parseNumber(a[valueKey]))
     .slice(0, 20);
 
   if (!sorted.length) {
@@ -1227,11 +1278,11 @@ function buildRanking(containerId, rows, valueKey, barClass, valClass) {
     return;
   }
 
-  const max = Math.max(...sorted.map(r => Number(r[valueKey]) || 0), 1);
+  const max = Math.max(...sorted.map(r => parseNumber(r[valueKey])), 1);
   const medal = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
 
   document.getElementById(containerId).innerHTML = sorted.map((r, i) => {
-    const value = Number(r[valueKey]) || 0;
+    const value = parseNumber(r[valueKey]);
     const scaled = max > 1
       ? (Math.log10(value + 1) / Math.log10(max + 1)) * 67 + 18
       : 18;
@@ -1281,8 +1332,8 @@ function buildGrowthRanking(containerId, rows) {
   const growthList = latestRows
     .filter(r => !EXCLUDED_TITLES.includes(r.title))
     .map(r => {
-      const currentPV = Number(r.read_count) || 0;
-      const prevPV = baseMap[r.key] ? (Number(baseMap[r.key].read_count) || 0) : 0;
+      const currentPV = parseNumber(r.read_count);
+      const prevPV = baseMap[r.key] ? parseNumber(baseMap[r.key].read_count) : 0;
       return { ...r, growth: currentPV - prevPV };
     })
     .filter(r => r.growth > 0)
@@ -1332,21 +1383,27 @@ function buildAssetTable(rows) {
     return;
   }
 
-  const maxGain = Math.max(...rows.map(r => Number(r['期間増加PV'] || 0)), 1);
+  const gainKey = findColumn(rows[0], ['期間増加PV', 'period_growth_pv']);
+  const activeKey = findColumn(rows[0], ['稼働日数', 'active_days']);
+  const trendKey = findColumn(rows[0], ['推移PV', 'trend_pv']);
+  const titleKey = findColumn(rows[0], ['title', 'タイトル']);
+
+  const maxGain = Math.max(...rows.map(r => parseNumber(gainKey ? r[gainKey] : 0)), 1);
+
   tbody.innerHTML = rows.slice(0, 15).map((r, i) => {
-    const gain = Number(r['期間増加PV'] || 0);
+    const gain = parseNumber(gainKey ? r[gainKey] : 0);
     const barW = (gain / maxGain * 100).toFixed(1);
-    const trend = r['推移PV'] || '---';
+    const trend = trendKey ? r[trendKey] : '---';
 
     return `
       <tr>
         <td class="num-muted">${i + 1}</td>
-        <td>${escapeHTML(r.title || r['title'] || '')}</td>
+        <td>${escapeHTML(titleKey ? r[titleKey] : '')}</td>
         <td>
           <span class="inline-bar"><span class="inline-bar-fill" style="width:${barW}%"></span></span>
           <span class="num-accent">${gain.toLocaleString()}</span>
         </td>
-        <td class="num-right">${escapeHTML(r['稼働日数'] || '')}</td>
+        <td class="num-right">${escapeHTML(activeKey ? r[activeKey] : '')}</td>
         <td class="num-muted">${escapeHTML(trend)}</td>
       </tr>
     `;
@@ -1360,23 +1417,29 @@ function buildTrendDetailed(rows) {
     return;
   }
 
+  const stateKey = findColumn(rows[0], ['状態', 'state']);
+  const titleKey = findColumn(rows[0], ['title', 'タイトル']);
+  const totalPvKey = findColumn(rows[0], ['累計PV', 'total_pv']);
+  const scoreKey = findColumn(rows[0], ['トレンドスコア', 'trend_score']);
+
   tbody.innerHTML = rows.slice(0, 20).map(r => {
-    const state = r['状態'] || '';
+    const state = stateKey ? (r[stateKey] || '') : '';
     let badgeClass = 'badge-idle';
     if (state.includes('🔥')) badgeClass = 'badge-hot';
     else if (state.includes('🟢')) badgeClass = 'badge-grow';
 
     const dailyCells = [1,2,3,4,5,6,7].map(i => {
-      const v = Number(r[`-${i}日PV`] || 0);
+      const key = findColumn(r, [`-${i}日PV`, `day_minus_${i}_pv`]);
+      const v = parseNumber(key ? r[key] : 0);
       return `<td class="${v > 0 ? 'num-right' : 'num-muted'}">${v || '—'}</td>`;
     }).join('');
 
     return `
       <tr>
         <td><span class="status-badge ${badgeClass}">${escapeHTML(state)}</span></td>
-        <td>${escapeHTML(r['title'] || '')}</td>
-        <td class="num-right">${(Number(r['累計PV']) || 0).toLocaleString()}</td>
-        <td class="num-accent">${escapeHTML(r['トレンドスコア'] || '')}</td>
+        <td>${escapeHTML(titleKey ? r[titleKey] : '')}</td>
+        <td class="num-right">${parseNumber(totalPvKey ? r[totalPvKey] : 0).toLocaleString()}</td>
+        <td class="num-accent">${escapeHTML(scoreKey ? r[scoreKey] : '')}</td>
         ${dailyCells}
       </tr>
     `;
@@ -1400,11 +1463,341 @@ function buildGenericTable(headId, bodyId, rows, limit = 20) {
     <tr>
       ${headers.map(h => {
         const val = r[h] ?? '';
-        const isNum = /^-?\d+(\.\d+)?$/.test(String(val));
+        const isNum = /^-?\d+(\.\d+)?$/.test(String(val).replace(/,/g, ''));
         return `<td class="${isNum ? 'num-right' : ''}">${escapeHTML(val)}</td>`;
       }).join('')}
     </tr>
   `).join('');
+}
+
+/* コメント分析 */
+function buildLatestArticleRows(rows) {
+  const byKey = {};
+
+  for (const r of rows) {
+    if (EXCLUDED_TITLES.includes(r.title)) continue;
+
+    const key = r.key || r.title;
+    const commentCount = parseNumber(r.comment_count);
+
+    if (isNaN(commentCount)) continue;
+
+    if (!byKey[key] || r.date > byKey[key].date) {
+      byKey[key] = r;
+    }
+  }
+
+  return Object.values(byKey).map(r => {
+    const pv = parseNumber(r.read_count);
+    const likes = parseNumber(r.like_count);
+    const comments = parseNumber(r.comment_count);
+
+    return {
+      key: r.key || '',
+      title: r.title || '',
+      read_count: pv,
+      like_count: likes,
+      comment_count: comments,
+      comment_rate: pv >= 50 ? (comments / pv) * 100 : null,
+      comment_like_rate: (likes >= 30 && pv >= 300) ? (comments / likes) * 100 : null
+    };
+  });
+}
+
+function renderCommentKPIs(rows) {
+  if (!rows.length) return;
+
+  const total = rows.reduce((sum, r) => sum + (parseNumber(r.comment_count) || 0), 0);
+  const engaged = rows.filter(r => (parseNumber(r.comment_count) || 0) >= 1).length;
+
+  const rateRows = rows.filter(r => r.comment_rate !== null);
+  const avgRate = rateRows.length
+    ? rateRows.reduce((sum, r) => sum + r.comment_rate, 0) / rateRows.length
+    : 0;
+
+  const likeRateRows = rows.filter(r => r.comment_like_rate !== null);
+  const avgLikeRate = likeRateRows.length
+    ? likeRateRows.reduce((sum, r) => sum + r.comment_like_rate, 0) / likeRateRows.length
+    : 0;
+
+  const maxRow = rows.reduce((a, b) =>
+    (parseNumber(a.comment_count) || 0) >= (parseNumber(b.comment_count) || 0) ? a : b
+  , rows[0]);
+
+  const topCommentsEl = document.getElementById('kpi-comments');
+  if (topCommentsEl) topCommentsEl.textContent = total.toLocaleString();
+
+  const commentTotalEl = document.getElementById('comment-total');
+  if (commentTotalEl) commentTotalEl.textContent = total.toLocaleString();
+
+  const commentTotalSubEl = document.getElementById('comment-total-sub');
+  if (commentTotalSubEl) commentTotalSubEl.textContent = `${rows.length}記事中 ${engaged}記事にコメントあり`;
+
+  const commentEngagedEl = document.getElementById('comment-engaged');
+  if (commentEngagedEl) commentEngagedEl.textContent = engaged.toLocaleString();
+
+  const commentRateEl = document.getElementById('comment-rate');
+  if (commentRateEl) commentRateEl.textContent = avgRate.toFixed(3) + '%';
+
+  const commentLikeRateEl = document.getElementById('comment-like-rate');
+  if (commentLikeRateEl) commentLikeRateEl.textContent = avgLikeRate.toFixed(3) + '%';
+
+  const commentMaxEl = document.getElementById('comment-max');
+  if (commentMaxEl) commentMaxEl.textContent = (parseNumber(maxRow?.comment_count) || 0).toLocaleString();
+
+  const commentMaxTitleEl = document.getElementById('comment-max-title');
+  if (commentMaxTitleEl) commentMaxTitleEl.textContent = maxRow?.title || '—';
+}
+
+function buildSimpleRanking(containerId, rows, valueKey, barClass, valClass, formatter) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+
+  if (!rows.length) {
+    el.innerHTML = '<div class="card"><div class="empty-note">データなし</div></div>';
+    return;
+  }
+
+  const max = Math.max(...rows.map(r => parseNumber(r[valueKey])), 1);
+  const medal = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+
+  el.innerHTML = rows.map((r, i) => {
+    const value = parseNumber(r[valueKey]);
+    const scaled = (value / max) * 100;
+    const url = buildNoteUrl(r);
+    const titleHTML = url
+      ? `<a class="rank-title rank-link" href="${url}" target="_blank" rel="noopener noreferrer" title="${escapeHTML(r.title)}">${escapeHTML(r.title)}</a>`
+      : `<span class="rank-title" title="${escapeHTML(r.title)}">${escapeHTML(r.title)}</span>`;
+
+    return `
+      <div class="rank-item">
+        <div class="rank-head">
+          <span class="rank-num ${medal(i)}">${String(i + 1).padStart(2, '0')}</span>
+          ${titleHTML}
+        </div>
+        <div class="rank-meta">
+          <span class="rank-val ${valClass}">${formatter(value)}</span>
+          <div class="rank-bar">
+            <div class="rank-bar-fill ${barClass}" style="width:${scaled.toFixed(1)}%"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function buildCommentScatter(rows) {
+  const canvas = document.getElementById('chart-comment-scatter');
+  if (!canvas) return;
+
+  const points = rows.filter(r => r.read_count > 0 && r.comment_count > 0);
+
+  new Chart(canvas, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: '記事',
+        data: points.map(r => ({
+          x: r.read_count,
+          y: r.comment_count,
+          title: r.title,
+          rate: r.comment_rate
+        })),
+        backgroundColor: points.map(r => {
+          if (r.comment_rate === null) return 'rgba(120,198,231,0.7)';
+          if (r.comment_rate >= 0.5) return 'rgba(215,155,199,0.8)';
+          if (r.comment_rate >= 0.1) return 'rgba(228,197,139,0.8)';
+          return 'rgba(120,198,231,0.7)';
+        }),
+        pointRadius: 5,
+        pointHoverRadius: 7
+      }]
+    },
+    options: {
+      ...baseOpts(),
+      plugins: {
+        ...baseOpts().plugins,
+        legend: { display: false },
+        tooltip: {
+          ...baseOpts().plugins.tooltip,
+          callbacks: {
+            title: items => items[0]?.raw?.title || '',
+            label: item => {
+              const d = item.raw;
+              const lines = [
+                `PV: ${parseNumber(d.x).toLocaleString()}`,
+                `コメント: ${parseNumber(d.y).toLocaleString()}件`
+              ];
+              if (d.rate !== null && d.rate !== undefined) {
+                lines.push(`コメント率: ${d.rate.toFixed(3)}%`);
+              }
+              return lines;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: GRID_COLOR },
+          ticks: { color: '#8b83a5' },
+          title: { display: true, text: '累計PV', color: '#8b83a5' }
+        },
+        y: {
+          grid: { color: GRID_COLOR },
+          ticks: { color: '#8b83a5', stepSize: 1 },
+          title: { display: true, text: 'コメント数', color: '#8b83a5' }
+        }
+      }
+    }
+  });
+}
+
+function renderCommentSection(articleRows) {
+  const rows = buildLatestArticleRows(articleRows);
+  if (!rows.length) return;
+
+  renderCommentKPIs(rows);
+
+  buildSimpleRanking(
+    'ranking-comments',
+    [...rows].sort((a, b) => b.comment_count - a.comment_count).slice(0, 10),
+    'comment_count',
+    'like-bar',
+    'like-val',
+    v => `${v.toLocaleString()}件`
+  );
+
+  buildSimpleRanking(
+    'ranking-comment-rate',
+    [...rows]
+      .filter(r => r.comment_rate !== null)
+      .sort((a, b) => b.comment_rate - a.comment_rate)
+      .slice(0, 10),
+    'comment_rate',
+    'growth-bar',
+    'growth-val',
+    v => `${v.toFixed(3)}%`
+  );
+
+  buildCommentScatter(rows);
+}
+
+/* Weekly / Monthly */
+function buildPeriodKPIs(rows, prefix) {
+  if (!rows.length) return;
+  const latest = rows[rows.length - 1];
+
+  const label = getField(latest, ['週', 'week', 'month', '月', 'period'], '—');
+  const views = parseNumber(getField(latest, ['ビュー増加', '週次PV', '月次PV', 'views', 'pv', 'view']));
+  const likes = parseNumber(getField(latest, ['スキ増加', '週次スキ', '月次スキ', 'likes', 'like']));
+  const comments = parseNumber(getField(latest, ['コメント増加', '週次コメント', '月次コメント', 'comments', 'comment']));
+  
+  document.getElementById(`${prefix}-kpi-label`).textContent = label || '—';
+  document.getElementById(`${prefix}-kpi-views`).textContent = views.toLocaleString();
+  document.getElementById(`${prefix}-kpi-likes`).textContent = likes.toLocaleString();
+  document.getElementById(`${prefix}-kpi-comments`).textContent = comments.toLocaleString();
+}
+
+function buildPeriodChart(rows, canvasId, mode = 'primary') {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas || !rows.length) return;
+
+  const labels = rows.map(r => getField(r, ['週', 'week', 'month', '月', 'period'], '—'));
+  const views = rows.map(r => parseNumber(getField(r, ['ビュー増加', '週次PV', '月次PV', 'views', 'pv', 'view'])));
+  const likes = rows.map(r => parseNumber(getField(r, ['スキ増加', '週次スキ', '月次スキ', 'likes', 'like'])));
+  const comments = rows.map(r => parseNumber(getField(r, ['コメント増加', '週次コメント', '月次コメント', 'comments', 'comment'])));
+  const followers = rows.map(r => parseNumber(getField(r, ['フォロワー増加', '週次フォロワー', '月次フォロワー', 'followers', 'follower'])));
+
+  const datasets = mode === 'primary'
+    ? [
+        {
+          type: 'bar',
+          label: 'スキ',
+          data: likes,
+          backgroundColor: 'rgba(215,155,199,0.50)',
+          borderColor: 'rgba(215,155,199,0.9)',
+          borderWidth: 1,
+          borderRadius: 6,
+          yAxisID: 'y1'
+        },
+        {
+          type: 'line',
+          label: 'PV',
+          data: views,
+          borderColor: '#7cc8e8',
+          backgroundColor: 'rgba(124,200,232,0.12)',
+          fill: true,
+          tension: 0.35,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          borderWidth: 2,
+          yAxisID: 'y'
+        }
+      ]
+    : [
+        {
+          type: 'bar',
+          label: 'コメント',
+          data: comments,
+          backgroundColor: 'rgba(231,169,188,0.55)',
+          borderColor: 'rgba(231,169,188,0.95)',
+          borderWidth: 1,
+          borderRadius: 6,
+          yAxisID: 'y1'
+        },
+        {
+          type: 'line',
+          label: 'フォロワー増',
+          data: followers,
+          borderColor: '#a98ad9',
+          backgroundColor: 'rgba(169,138,217,0.10)',
+          fill: true,
+          tension: 0.35,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          borderWidth: 2,
+          yAxisID: 'y'
+        }
+      ];
+
+  new Chart(canvas, {
+    data: { labels, datasets },
+    options: {
+      ...baseOpts(),
+      scales: {
+        x: {
+          grid: { color: GRID_COLOR },
+          ticks: { color: '#8b83a5', maxTicksLimit: 8 }
+        },
+        y: {
+          position: 'left',
+          grid: { color: GRID_COLOR },
+          ticks: { color: '#8b83a5' }
+        },
+        y1: {
+          position: 'right',
+          grid: { display: false },
+          ticks: { color: '#8b83a5' }
+        }
+      }
+    }
+  });
+}
+
+function setupTabs() {
+  const buttons = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.tab-panel');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+
+      btn.classList.add('active');
+      const target = document.getElementById(`tab-${btn.dataset.tab}`);
+      if (target) target.classList.add('active');
+    });
+  });
 }
 
 function validateConfig() {
@@ -1416,6 +1809,7 @@ function validateConfig() {
 }
 
 async function init() {
+  setupTabs();
   if (!validateConfig()) return;
 
   try {
@@ -1425,16 +1819,14 @@ async function init() {
       trend,
       assets,
       weekly,
-      monthly,
-      period
+      monthly
     ] = await Promise.all([
       fetchCSV('daily_summary'),
       fetchCSV('articles'),
       fetchCSV('trend_analysis'),
       fetchCSV('asset_articles'),
       fetchCSV('weekly_summary'),
-      fetchCSV('monthly_summary'),
-      fetchCSV('period_ranking')
+      fetchCSV('monthly_summary')
     ]);
 
     let followers = [];
@@ -1444,16 +1836,15 @@ async function init() {
       console.warn('followers.csv not found, fallback to summary only');
     }
 
-const latest = summary[summary.length - 1];
-document.getElementById('kpi-views').textContent = (Number(latest['ビュー合計']) || 0).toLocaleString();
-document.getElementById('kpi-likes').textContent = (Number(latest['スキ合計']) || 0).toLocaleString();
-document.getElementById('kpi-comments').textContent = (Number(latest['コメント合計']) || 0).toLocaleString();
-document.getElementById('kpi-articles').textContent = (Number(latest['記事数']) || 0).toLocaleString();
-document.getElementById('kpi-followers').textContent = latest['フォロワー数'] || '—';
-document.getElementById('last-updated').textContent = `updated ${latest['日付'] || ''} ${latest['更新時刻'] || ''}`;
+    const latest = summary[summary.length - 1];
+    document.getElementById('kpi-views').textContent = parseNumber(getField(latest, ['ビュー合計'])).toLocaleString();
+    document.getElementById('kpi-likes').textContent = parseNumber(getField(latest, ['スキ合計'])).toLocaleString();
+    document.getElementById('kpi-articles').textContent = parseNumber(getField(latest, ['記事数'])).toLocaleString();
+    document.getElementById('kpi-followers').textContent = getField(latest, ['フォロワー数'], '—');
+    document.getElementById('last-updated').textContent = `updated ${getField(latest, ['日付']) || ''} ${getField(latest, ['更新時刻']) || ''}`;
 
-    setDiff('kpi-views-diff', parseFloat(latest['ビュー前日比(%)']));
-    setDiff('kpi-likes-diff', parseFloat(latest['スキ前日比(%)']));
+    setDiff('kpi-views-diff', parseFloat(getField(latest, ['ビュー前日比(%)'])));
+    setDiff('kpi-likes-diff', parseFloat(getField(latest, ['スキ前日比(%)'])));
 
     buildDaily(summary);
     buildRanking('ranking-views', articles, 'read_count', 'view-bar', 'view-val');
@@ -1464,12 +1855,19 @@ document.getElementById('last-updated').textContent = `updated ${latest['日付'
     buildAssetTable(assets);
     buildTrendDetailed(trend);
 
-    buildGenericTable('weekly-head', 'weekly-body', weekly, 12);
-    buildGenericTable('monthly-head', 'monthly-body', monthly, 12);
-    buildGenericTable('period-head', 'period-body', period, 50);
-    
-renderCommentSection(articles);
-    
+    renderCommentSection(articles);
+
+    buildGenericTable('weekly-head', 'weekly-body', weekly, 30);
+    buildGenericTable('monthly-head', 'monthly-body', monthly, 24);
+
+    buildPeriodKPIs(weekly, 'weekly');
+    buildPeriodKPIs(monthly, 'monthly');
+
+    buildPeriodChart(weekly, 'chart-weekly', 'primary');
+    buildPeriodChart(weekly, 'chart-weekly-secondary', 'secondary');
+    buildPeriodChart(monthly, 'chart-monthly', 'primary');
+    buildPeriodChart(monthly, 'chart-monthly-secondary', 'secondary');
+
   } catch (e) {
     console.error(e);
     document.getElementById('last-updated').textContent = 'error: ' + e.message;
