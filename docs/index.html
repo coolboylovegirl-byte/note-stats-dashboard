@@ -1839,29 +1839,7 @@ function buildPeriodChart(rows, canvasId, mode = 'primary', type = 'weekly') {
   });
 }
 
-  new Chart(canvas, {
-    data: { labels, datasets },
-    options: {
-      ...baseOpts(),
-      scales: {
-        x: {
-          grid: { color: GRID_COLOR },
-          ticks: { color: '#8b83a5', maxTicksLimit: 8 }
-        },
-        y: {
-          position: 'left',
-          grid: { color: GRID_COLOR },
-          ticks: { color: '#8b83a5' }
-        },
-        y1: {
-          position: 'right',
-          grid: { display: false },
-          ticks: { color: '#8b83a5' }
-        }
-      }
-    }
-  });
-}
+  
 
 function setupTabs() {
   const buttons = document.querySelectorAll('.tab-btn');
@@ -1942,10 +1920,10 @@ async function init() {
 buildPeriodKPIs(weekly, 'weekly', 'weekly');
 buildPeriodKPIs(monthly, 'monthly', 'monthly');
 
-    buildPeriodChart(weekly, 'chart-weekly', 'primary');
-    buildPeriodChart(weekly, 'chart-weekly-secondary', 'secondary');
-    buildPeriodChart(monthly, 'chart-monthly', 'primary');
-    buildPeriodChart(monthly, 'chart-monthly-secondary', 'secondary');
+    buildPeriodChart(weekly, 'chart-weekly', 'primary', 'weekly');
+buildPeriodChart(weekly, 'chart-weekly-secondary', 'secondary', 'weekly');
+buildPeriodChart(monthly, 'chart-monthly', 'primary', 'monthly');
+buildPeriodChart(monthly, 'chart-monthly-secondary', 'secondary', 'monthly');
 
   } catch (e) {
     console.error(e);
