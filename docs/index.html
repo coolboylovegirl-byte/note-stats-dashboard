@@ -769,20 +769,56 @@ function buildLatestArticleRows(rows) {
 }
 
 function renderCommentKPIs(rows) {
-  const total = rows.reduce((sum, r) => sum + r.comment_count, 0);
-  const engaged = rows.filter(r => r.comment_count >= 1).length;
-  const rateRows = rows.filter(r => r.comment_rate !== null && r.read_count >= 500)
+  if (!rows.length) return;
+
+  const total = rows.reduce((sum, r) => sum + (Number(r.comment_count) || 0), 0);
+  const engaged = rows.filter(r => (Number(r.comment_count) || 0) >= 1).length;
+
+  const rateRows = rows.filter(r => r.comment_rate !== null);
   const avgRate = rateRows.length
     ? rateRows.reduce((sum, r) => sum + r.comment_rate, 0) / rateRows.length
     : 0;
-  const maxRow = rows.reduce((a, b) => (a.comment_count >= b.comment_count ? a : b), rows[0]);
 
-  document.getElementById('comment-total').textContent = total.toLocaleString();
-  document.getElementById('comment-total-sub').textContent = `${rows.length}記事中 ${engaged}記事にコメントあり`;
-  document.getElementById('comment-engaged').textContent = engaged.toLocaleString();
-  document.getElementById('comment-rate').textContent = avgRate.toFixed(3) + '%';
-  document.getElementById('comment-max').textContent = (maxRow?.comment_count || 0).toLocaleString();
-  document.getElementById('comment-max-title').textContent = maxRow?.title || '—';
+  const maxRow = rows.reduce((a, b) =>
+    (Number(a.comment_count) || 0) >= (Number(b.comment_count) || 0) ? a : b
+  , rows[0]);
+
+  // 上段KPI
+  const topCommentsEl = document.getElementById('kpi-comments');
+  if (topCommentsEl) {
+    topCommentsEl.textContent = total.toLocaleString();
+  }
+
+  // コメント分析セクションKPI
+  const commentTotalEl = document.getElementById('comment-total');
+  if (commentTotalEl) {
+    commentTotalEl.textContent = total.toLocaleString();
+  }
+
+  const commentTotalSubEl = document.getElementById('comment-total-sub');
+  if (commentTotalSubEl) {
+    commentTotalSubEl.textContent = `${rows.length}記事中 ${engaged}記事にコメントあり`;
+  }
+
+  const commentEngagedEl = document.getElementById('comment-engaged');
+  if (commentEngagedEl) {
+    commentEngagedEl.textContent = engaged.toLocaleString();
+  }
+
+  const commentRateEl = document.getElementById('comment-rate');
+  if (commentRateEl) {
+    commentRateEl.textContent = avgRate.toFixed(3) + '%';
+  }
+
+  const commentMaxEl = document.getElementById('comment-max');
+  if (commentMaxEl) {
+    commentMaxEl.textContent = (Number(maxRow?.comment_count) || 0).toLocaleString();
+  }
+
+  const commentMaxTitleEl = document.getElementById('comment-max-title');
+  if (commentMaxTitleEl) {
+    commentMaxTitleEl.textContent = maxRow?.title || '—';
+  }
 }
 
 function buildSimpleRanking(containerId, rows, valueKey, barClass, valClass, formatter) {
@@ -887,7 +923,6 @@ function buildCommentScatter(rows) {
 
 function renderCommentSection(articleRows) {
   const rows = buildLatestArticleRows(articleRows);
-
   if (!rows.length) return;
 
   renderCommentKPIs(rows);
@@ -915,6 +950,7 @@ function renderCommentSection(articleRows) {
 
   buildCommentScatter(rows);
 }
+
 function parseCSV(text) {
   const rows = [];
   let row = [];
@@ -1407,14 +1443,6 @@ document.getElementById('last-updated').textContent = `updated ${latest['日付'
     buildGenericTable('weekly-head', 'weekly-body', weekly, 12);
     buildGenericTable('monthly-head', 'monthly-body', monthly, 12);
     buildGenericTable('period-head', 'period-body', period, 50);
-
-    const totalComments = articles.reduce(
-  (sum, r) => sum + (Number(r.comment_count) || 0),
-  0
-);
-
-document.getElementById('kpi-comments').textContent =
-  totalComments.toLocaleString();
     
 renderCommentSection(articles);
     
