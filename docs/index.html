@@ -1683,30 +1683,85 @@ function renderCommentSection(articleRows) {
 }
 
 /* Weekly / Monthly */
-function buildPeriodKPIs(rows, prefix) {
-  if (!rows.length) return;
-  const latest = rows[rows.length - 1];
+function aggregatePeriodRows(rows, type = 'weekly') {
+  if (!rows.length) return [];
 
-  const label = getField(latest, ['週', 'week', 'month', '月', 'period'], '—');
-  const views = parseNumber(getField(latest, ['ビュー増加', '週次PV', '月次PV', 'views', 'pv', 'view']));
-  const likes = parseNumber(getField(latest, ['スキ増加', '週次スキ', '月次スキ', 'likes', 'like']));
-  const comments = parseNumber(getField(latest, ['コメント増加', '週次コメント', '月次コメント', 'comments', 'comment']));
-  
-  document.getElementById(`${prefix}-kpi-label`).textContent = label || '—';
-  document.getElementById(`${prefix}-kpi-views`).textContent = views.toLocaleString();
-  document.getElementById(`${prefix}-kpi-likes`).textContent = likes.toLocaleString();
-  document.getElementById(`${prefix}-kpi-comments`).textContent = comments.toLocaleString();
+  const yearKey = findColumn(rows[0], ['年', 'year']);
+  const weekKey = findColumn(rows[0], ['週', 'week']);
+  const monthKey = findColumn(rows[0], ['月', 'month']);
+  const startKey = findColumn(rows[0], ['週開始日', '月開始日', 'start_date']);
+  const endKey = findColumn(rows[0], ['週終了日', '月終了日', 'end_date']);
+  const pvKey = findColumn(rows[0], ['期間増加PV', 'ビュー増加', '週次PV', '月次PV', 'pv', 'views']);
+  const likeKey = findColumn(rows[0], ['期間増加スキ', 'スキ増加', '週次スキ', '月次スキ', 'likes']);
+  const commentKey = findColumn(rows[0], ['期間増加コメント', 'コメント増加', '週次コメント', '月次コメント', 'comments']);
+  const followerKey = findColumn(rows[0], ['期間増加フォロワー', 'フォロワー増加', '週次フォロワー', '月次フォロワー', 'followers']);
+
+  const map = new Map();
+
+  rows.forEach(r => {
+    let label = '';
+
+    if (type === 'weekly') {
+      const year = yearKey ? r[yearKey] : '';
+      const week = weekKey ? r[weekKey] : '';
+      label = year && week ? `${year}-W${String(week).padStart(2, '0')}` : (week || '—');
+    } else {
+      const month = monthKey ? r[monthKey] : '';
+      if (month) {
+        label = month;
+      } else if (startKey && r[startKey]) {
+        label = String(r[startKey]).slice(0, 7);
+      } else {
+        label = '—';
+      }
+    }
+
+    if (!map.has(label)) {
+      map.set(label, {
+        label,
+        start: startKey ? r[startKey] || '' : '',
+        end: endKey ? r[endKey] || '' : '',
+        views: 0,
+        likes: 0,
+        comments: 0,
+        followers: 0
+      });
+    }
+
+    const item = map.get(label);
+    item.views += parseNumber(pvKey ? r[pvKey] : 0);
+    item.likes += parseNumber(likeKey ? r[likeKey] : 0);
+    item.comments += parseNumber(commentKey ? r[commentKey] : 0);
+    item.followers += parseNumber(followerKey ? r[followerKey] : 0);
+  });
+
+  return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
 }
 
-function buildPeriodChart(rows, canvasId, mode = 'primary') {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas || !rows.length) return;
+function buildPeriodKPIs(rows, prefix, type = 'weekly') {
+  const aggregated = aggregatePeriodRows(rows, type);
+  if (!aggregated.length) return;
 
-  const labels = rows.map(r => getField(r, ['週', 'week', 'month', '月', 'period'], '—'));
-  const views = rows.map(r => parseNumber(getField(r, ['ビュー増加', '週次PV', '月次PV', 'views', 'pv', 'view'])));
-  const likes = rows.map(r => parseNumber(getField(r, ['スキ増加', '週次スキ', '月次スキ', 'likes', 'like'])));
-  const comments = rows.map(r => parseNumber(getField(r, ['コメント増加', '週次コメント', '月次コメント', 'comments', 'comment'])));
-  const followers = rows.map(r => parseNumber(getField(r, ['フォロワー増加', '週次フォロワー', '月次フォロワー', 'followers', 'follower'])));
+  const latest = aggregated[aggregated.length - 1];
+
+  document.getElementById(`${prefix}-kpi-label`).textContent = latest.label || '—';
+  document.getElementById(`${prefix}-kpi-views`).textContent = latest.views.toLocaleString();
+  document.getElementById(`${prefix}-kpi-likes`).textContent = latest.likes.toLocaleString();
+  document.getElementById(`${prefix}-kpi-comments`).textContent = latest.comments.toLocaleString();
+}
+
+function buildPeriodChart(rows, canvasId, mode = 'primary', type = 'weekly') {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+
+  const aggregated = aggregatePeriodRows(rows, type);
+  if (!aggregated.length) return;
+
+  const labels = aggregated.map(r => r.label);
+  const views = aggregated.map(r => r.views);
+  const likes = aggregated.map(r => r.likes);
+  const comments = aggregated.map(r => r.comments);
+  const followers = aggregated.map(r => r.followers);
 
   const datasets = mode === 'primary'
     ? [
@@ -1759,6 +1814,30 @@ function buildPeriodChart(rows, canvasId, mode = 'primary') {
           yAxisID: 'y'
         }
       ];
+
+  new Chart(canvas, {
+    data: { labels, datasets },
+    options: {
+      ...baseOpts(),
+      scales: {
+        x: {
+          grid: { color: GRID_COLOR },
+          ticks: { color: '#8b83a5', maxTicksLimit: 8 }
+        },
+        y: {
+          position: 'left',
+          grid: { color: GRID_COLOR },
+          ticks: { color: '#8b83a5' }
+        },
+        y1: {
+          position: 'right',
+          grid: { display: false },
+          ticks: { color: '#8b83a5' }
+        }
+      }
+    }
+  });
+}
 
   new Chart(canvas, {
     data: { labels, datasets },
@@ -1860,8 +1939,8 @@ async function init() {
     buildGenericTable('weekly-head', 'weekly-body', weekly, 30);
     buildGenericTable('monthly-head', 'monthly-body', monthly, 24);
 
-    buildPeriodKPIs(weekly, 'weekly');
-    buildPeriodKPIs(monthly, 'monthly');
+buildPeriodKPIs(weekly, 'weekly', 'weekly');
+buildPeriodKPIs(monthly, 'monthly', 'monthly');
 
     buildPeriodChart(weekly, 'chart-weekly', 'primary');
     buildPeriodChart(weekly, 'chart-weekly-secondary', 'secondary');
