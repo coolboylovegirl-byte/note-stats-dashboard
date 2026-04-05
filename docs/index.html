@@ -1923,10 +1923,15 @@ function buildPeriodPrimaryChart(rows, canvasId, type = 'weekly', snapshotRows =
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
-  const aggregated =
+  const rawAggregated =
     (type === 'weekly' && snapshotRows && snapshotRows.length)
       ? normalizeWeeklySnapshotRows(snapshotRows)
       : aggregatePeriodRows(rows, type);
+
+  // snapshot フォールバック時は最初の週に累積PVが集中するため除外
+  const aggregated = (type === 'weekly' && !(snapshotRows && snapshotRows.length) && rawAggregated.length > 1)
+    ? rawAggregated.slice(1)
+    : rawAggregated;
 
   if (!aggregated.length) return;
 
@@ -1989,10 +1994,15 @@ function buildPeriodCommentsChart(rows, canvasId, type = 'weekly', snapshotRows 
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
-  const aggregated =
+  const rawAggregated =
     (type === 'weekly' && snapshotRows && snapshotRows.length)
       ? normalizeWeeklySnapshotRows(snapshotRows)
       : aggregatePeriodRows(rows, type);
+
+  // snapshot フォールバック時は最初の週に累積データが集中するため除外
+  const aggregated = (type === 'weekly' && !(snapshotRows && snapshotRows.length) && rawAggregated.length > 1)
+    ? rawAggregated.slice(1)
+    : rawAggregated;
 
   if (!aggregated.length) return;
 
