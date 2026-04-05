@@ -2072,7 +2072,6 @@ async function init() {
       assets,
       weekly,
       monthly,
-      weeklySnapshot
     ] = await Promise.all([
       fetchCSV('daily_summary'),
       fetchCSV('articles'),
@@ -2080,8 +2079,14 @@ async function init() {
       fetchCSV('asset_articles'),
       fetchCSV('weekly_summary'),
       fetchCSV('monthly_summary'),
-      fetchCSV('weekly_snapshot')
     ]);
+
+    let weeklySnapshot = [];
+    try {
+      weeklySnapshot = await fetchCSV('weekly_snapshot');
+    } catch (e) {
+      console.warn('weekly_snapshot.csv not found, falling back to weekly_summary aggregation');
+    }
 
     let followers = [];
     try {
